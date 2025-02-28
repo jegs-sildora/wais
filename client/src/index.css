@@ -1,0 +1,59 @@
+:root {
+  scrollbar-color:  #9FE870 #163300;
+  scrollbar-width: thin;
+}
+
+
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "tailwindcss-motion";
+
+@layer utilities;
+
+@theme {
+  --font-primary: "Inter", serif;
+  --font-secondary: "Parafina Black S";
+  --color-bright-green: #9FE870;
+  --color-bright-green-hover: #80E142;
+  --color-forest-green: #163300;
+  --color-white-hover: #EDEFEB;
+}
+
+@plugin "daisyui/theme" {
+  name: "wais";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0.003 247.858);
+  --color-base-200: oklch(98% 0 0);
+  --color-base-300: oklch(100% 0 0);
+  --color-base-content: #163300;
+  --color-primary: #9FE870;
+  --color-primary-content: #163300;
+  --color-secondary: oklch(26% 0.007 34.298);
+  --color-secondary-content: #9FE870;
+  --color-accent: #9FE870;
+  --color-accent-content: #163300;
+  --color-neutral: #80E142;
+  --color-neutral-content: #163300;
+  --color-info: #9FE870;
+  --color-info-content: #163300;
+  --color-success: oklch(60% 0.118 184.704);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(64% 0.222 41.116);
+  --color-warning-content: oklch(98% 0.016 73.684);
+  --color-error: oklch(57% 0.245 27.325);
+  --color-error-content: oklch(97% 0.013 17.38);
+  --radius-selector: 2rem;
+  --radius-field: 2rem;
+  --radius-box: 2rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+
+
+
