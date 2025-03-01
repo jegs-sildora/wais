@@ -14,7 +14,7 @@ export default function HomeSection() {
           <div className='max-w-2xl p-6'>
             <h1 className='text-5xl lg:text-6xl font-black leading-tight'>
               How will you spend your{" "}
-              <span className='line-through decoration-bright-green decoration-6 drop-shadow-md'>
+              <span className='line-through decoration-bright-green decoration-6 drop-shadow-2xl'>
                 money
               </span>{" "}
               life?

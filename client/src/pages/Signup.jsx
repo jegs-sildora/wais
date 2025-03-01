@@ -58,7 +58,7 @@ export default function Signup() {
         textClassName='text-2xl'
       />
 
-      <div className='flex flex-col h-screen justify-center px-6 py-12 lg:px-8 md:mt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
+      <div className='flex flex-col h-screen justify-center px-6 py-12 lg:px-8 lg:py-0 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <h2 className='text-center text-2xl/9 font-bold tracking-tight text-forest-green'>
             Create your&nbsp;
@@ -118,7 +118,7 @@ export default function Signup() {
                   placeholder='sample@sample.com'
                   required
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 input validator'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -169,10 +169,10 @@ export default function Signup() {
                 {loading ? "Creating account..." : "Create account"}
               </button>
 
-              <div className='flex items-center justify-center mt-5'>
+              <div className='flex  mt-5'>
                 <label
                   htmlFor='terms'
-                  className='ms-4 text-sm text-forest-green'
+                  className='text-xs lg:text-sm text-forest-green'
                 >
                   By registering, you accept our&nbsp;
                   <a

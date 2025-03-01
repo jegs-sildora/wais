@@ -8,7 +8,6 @@ export default function AboutSection() {
     >
       <img
         src={wave}
-        alt='Wave design'
         className='absolute top-0 left-0 w-full -mt-6 lg:-mt-24 drop-shadow-lg'
       />
 
