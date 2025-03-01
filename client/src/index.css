@@ -3,7 +3,6 @@
   scrollbar-width: thin;
 }
 
-
 @import "tailwindcss";
 @plugin "daisyui";
 @plugin "tailwindcss-motion";
@@ -19,31 +18,32 @@
   --color-white-hover: #EDEFEB;
 }
 
+
 @plugin "daisyui/theme" {
   name: "wais";
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(98% 0.003 247.858);
+  --color-base-100: oklch(98% 0.002 247.839);
   --color-base-200: oklch(98% 0 0);
-  --color-base-300: oklch(100% 0 0);
+  --color-base-300: oklch(98% 0.001 106.423);
   --color-base-content: #163300;
   --color-primary: #9FE870;
   --color-primary-content: #163300;
-  --color-secondary: oklch(26% 0.007 34.298);
-  --color-secondary-content: #9FE870;
+  --color-secondary: #9FE870;
+  --color-secondary-content: #163300;
   --color-accent: #9FE870;
   --color-accent-content: #163300;
-  --color-neutral: #80E142;
+  --color-neutral: #9FE870;
   --color-neutral-content: #163300;
-  --color-info: #9FE870;
-  --color-info-content: #163300;
-  --color-success: oklch(60% 0.118 184.704);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(64% 0.222 41.116);
+  --color-info: oklch(71% 0.143 215.221);
+  --color-info-content: oklch(98% 0.019 200.873);
+  --color-success: #9FE870;
+  --color-success-content: #163300;
+  --color-warning: oklch(70% 0.213 47.604);
   --color-warning-content: oklch(98% 0.016 73.684);
-  --color-error: oklch(57% 0.245 27.325);
-  --color-error-content: oklch(97% 0.013 17.38);
+  --color-error: oklch(65% 0.241 354.308);
+  --color-error-content: oklch(97% 0.014 343.198);
   --radius-selector: 2rem;
   --radius-field: 2rem;
   --radius-box: 2rem;

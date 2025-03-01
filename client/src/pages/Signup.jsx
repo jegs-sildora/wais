@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import FormNav from "../components/FormNav";
 import { Toaster, toast } from "sonner";
+import FormNav from "../components/FormNav";
+
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -24,7 +25,7 @@ export default function Signup() {
 
     try {
       const body = { username, email, password };
-      const response = await fetch("http://192.168.254.109:3000/signup", {
+      const response = await fetch("http://192.168.73.109:3000/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -57,7 +58,7 @@ export default function Signup() {
         textClassName='text-2xl'
       />
 
-      <div className='flex flex-col h-screen justify-center px-6 py-12 lg:px-8 md:mt-0'>
+      <div className='flex flex-col h-screen justify-center px-6 py-12 lg:px-8 md:mt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <h2 className='text-center text-2xl/9 font-bold tracking-tight text-forest-green'>
             Create your&nbsp;
@@ -66,7 +67,7 @@ export default function Signup() {
             </Link>
             &nbsp;account!
           </h2>
-          <p className='mt-4 text-center text-base font-light text-forest-green'>
+          <p className='mt-2 text-center text-base font-light text-forest-green'>
             Already have an account?&nbsp;
             <Link
               to='/login'
@@ -138,7 +139,7 @@ export default function Signup() {
                   type={showPassword ? "text" : "password"}
                   name='password'
                   id='password'
-                  placeholder='********'
+                  placeholder='········'
                   required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
@@ -187,6 +188,9 @@ export default function Signup() {
           <Toaster
             richColors
             position='top-right'
+            toastOptions={{
+              className: "font-primary text-5xl",
+            }}
           />
         </div>
       </div>

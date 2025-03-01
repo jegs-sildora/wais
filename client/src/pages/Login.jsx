@@ -27,7 +27,7 @@ export default function Login() {
         usernameOrEmail: usernameOrEmail,
         password: password,
       };
-      const response = await fetch("http://192.168.254.109:3000/login", {
+      const response = await fetch("http://192.168.73.109:3000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,12 +54,11 @@ export default function Login() {
   return (
     <>
       <FormNav title={"WAIS."} />
-      <div className='flex flex-col h-screen justify-center px-6 md:mt-0'>
+      <div className='flex flex-col h-screen justify-center px-6 md:mt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <img
-            className='mx-auto h-20 w-auto motion-preset-focus motion-preset-oscillate motion-ease-spring-smooth'
+            className='mx-auto h-20 w-auto motion-preset-focus motion-preset-oscillate motion-safe:motion-ease-spring-smooth'
             src={logo}
-            alt='Logo'
           />
           <h2 className='mt-5 text-center text-2xl font-bold tracking-tight text-forest-green'>
             Welcome back!
@@ -103,7 +102,7 @@ export default function Login() {
                 <div className='text-base'>
                   <a
                     href='#'
-                    className='text-forest-green hover:underline'
+                    className='text-forest-green hover:underline italic'
                   >
                     Forgot password?
                   </a>
@@ -160,6 +159,9 @@ export default function Login() {
           <Toaster
             richColors
             position='top-right'
+            toastOptions={{
+              className: "font-primary text-5xl",
+            }}
           />
         </div>
       </div>

@@ -29,7 +29,7 @@ export default function LandingPageNavBar() {
               </div>
               <ul
                 tabIndex={0}
-                className='menu menu-lg dropdown-content rounded-box mt-3 w-36 p-2 shadow'
+                className='menu menu-lg dropdown-content rounded-box mt-3 w-36 p-2 shadow bg-white'
               >
                 <li className='rounded-4xl hover:bg-bright-green'>
                   <ScrollLink
@@ -62,7 +62,7 @@ export default function LandingPageNavBar() {
             </div>
             <RouterLink
               to='/'
-              className='group text-4xl font-secondary text-forest-green motion-blur-in motion-opacity-in'
+              className='group text-4xl font-secondary text-forest-green motion-blur-in motion-opacity-in hover:underline decoration-bright-green'
             >
               WAIS
               <span className='text-forest-green group-hover:text-bright-green-hover'>
@@ -104,7 +104,7 @@ export default function LandingPageNavBar() {
           <div className='navbar-end'>
             <RouterLink
               to='/login'
-              className='btn rounded-4xl text-base bg-bright-green hover:bg-bright-green-hover'
+              className='btn rounded-4xl text-base bg-bright-green hover:bg-bright-green-hover font-bold'
             >
               Get Started
             </RouterLink>
