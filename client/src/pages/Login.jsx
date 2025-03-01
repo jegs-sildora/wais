@@ -54,7 +54,7 @@ export default function Login() {
   return (
     <>
       <FormNav title={"WAIS."} />
-      <div className='flex flex-col h-screen justify-center px-6 pt-26 lg:pt-0 '>
+      <div className='flex flex-col h-screen justify-center px-6 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <img
             className='mx-auto h-20 w-auto motion-preset-focus motion-preset-oscillate motion-safe:motion-ease-spring-smooth'
@@ -79,7 +79,6 @@ export default function Login() {
               </label>
               <div className='mt-2'>
                 <input
-                  input validator
                   type='text'
                   name='email'
                   placeholder='sample@sample.com'
@@ -101,12 +100,12 @@ export default function Login() {
                   Password
                 </label>
                 <div className='text-base'>
-                  <a
-                    href='#'
+                  <Link
+                    to='/forgotpassword'
                     className='text-forest-green hover:underline italic'
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div className='relative mt-2'>

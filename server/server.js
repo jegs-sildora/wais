@@ -18,7 +18,7 @@ app.post("/signup", async (req, res) => {
   try {
     const useremailCheck = await pool.query(
       "SELECT * FROM users WHERE email = $1",
-      [email]
+      [email],
     );
     if (useremailCheck.rows.length > 0) {
       return res.status(400).json({ error: "Email is already in use!" });
@@ -26,7 +26,7 @@ app.post("/signup", async (req, res) => {
 
     const usernameCheck = await pool.query(
       "SELECT * FROM users WHERE username = $1",
-      [username]
+      [username],
     );
     if (usernameCheck.rows.length > 0) {
       return res.status(400).json({ error: "Username is already taken!" });
@@ -37,7 +37,7 @@ app.post("/signup", async (req, res) => {
 
     const newUser = await pool.query(
       "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [username, email, hashedPassword]
+      [username, email, hashedPassword],
     );
 
     res.json({
@@ -61,7 +61,7 @@ app.post("/login", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM users WHERE email = $1 OR username = $1",
-      [usernameOrEmail]
+      [usernameOrEmail],
     );
 
     if (!usernameOrEmail) {
@@ -85,6 +85,58 @@ app.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching data:", err);
+    res.status(500).json({ err: "Internal server error" });
+  }
+});
+
+//FORGOT PASSWORD
+app.post("/forgotpassword", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const user = result.rows[0];
+
+    res.json({
+      message: "Email found!",
+      user: { email: user.email },
+    });
+  } catch (err) {
+    res.status(500).json({ err: "Internal server error" });
+  }
+});
+
+//CHANGING PASSWORD
+app.post("/changepassword", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await pool.query("UPDATE users SET password = $1 WHERE email = $2", [
+      hashedPassword,
+      email,
+    ]);
+
+    res.json({ message: "Password updated successfully!" });
+
+  } catch (err) {
     res.status(500).json({ err: "Internal server error" });
   }
 });
