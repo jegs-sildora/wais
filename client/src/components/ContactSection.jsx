@@ -2,7 +2,7 @@ export default function ContactSection() {
   return (
     <section
       id='contact'
-      className='relative flex justify-center items-center lg:h-screen text-forest-green bg-[url("/src/assets/blob-3-vert.svg")] lg:bg-[url("/src/assets/blob-3.svg")] bg-cover bg-right-bottom'
+      className='relative flex justify-center items-center lg:h-screen text-forest-green bg-[url("/src/assets/blob-3-vert.svg")] lg:bg-[url("/src/assets/blob-3.svg")] bg-cover bg-right-bottom lg:-mt-18'
     >
       <div className='hero'>
         <div className='hero-content flex-col lg:flex-row-reverse lg:gap-20'>
