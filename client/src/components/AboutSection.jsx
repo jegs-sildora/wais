@@ -16,7 +16,7 @@ export default function AboutSection() {
           The Simplest Way to Make the Most of Your Money
         </h1>
 
-        <div className='grid grid-cols-1 gap-8 mt-8 lg:mt-12 lg:grid-cols-2 lg:mx-auto lg:max-w-4xl'>
+        <div className='grid grid-cols-1 gap-8 mt-8 lg:mt-12 lg:grid-cols-2 lg:mx-auto lg:max-w-5xl'>
           <div className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl bg-forest-green'>
             <span className='inline-block p-3 bg-bright-green rounded-full'>
               <svg
@@ -85,7 +85,7 @@ export default function AboutSection() {
             </h1>
 
             <p className='text-gray-300 text-md'>
-              Easily manage finances with WAIS! Organize transactions, set
+              Easily manage finances with <span className="font-bold text-white">WAIS</span>! Organize transactions, set
               spending limits, and track every peso in one place. No stress,
               just smart budgeting!
             </p>
