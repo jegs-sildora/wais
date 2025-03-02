@@ -25,7 +25,7 @@ export default function Signup() {
 
     try {
       const body = { username, email, password };
-      const response = await fetch("http://192.168.73.109:3000/signup", {
+      const response = await fetch("http://192.168.253.109:3000/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

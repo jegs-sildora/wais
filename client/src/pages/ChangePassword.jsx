@@ -36,7 +36,7 @@ export default function ChangePassword() {
       };
 
       const response = await fetch(
-        "http://192.168.73.109:3000/changepassword",
+        "http://192.168.253.109:3000/changepassword",
         {
           method: "POST",
           headers: {
