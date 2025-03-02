@@ -2,7 +2,7 @@ export default function ContactSection() {
   return (
     <section
       id='contact'
-      className='flex justify-center items-center min-h-screen p-6 bg-[url("/src/assets/blob-1.svg")] bg-cover bg-center'
+      className='relative flex justify-center items-center lg:h-screen text-forest-green bg-[url("/src/assets/blob-3-vert.svg")] lg:bg-[url("/src/assets/blob-3.svg")] bg-cover bg-right-bottom'
     >
       <div className='hero'>
         <div className='hero-content flex-col lg:flex-row-reverse lg:gap-20'>
@@ -16,13 +16,17 @@ export default function ContactSection() {
                 budgeting smarter, tracking expenses, or making the most of{" "}
                 <span className='font-black'>WAIS</span>
               </span>
-              , we’re here to help. Drop us a message and take 
-              <span className='font-bold'> one step closer to financial freedom!</span>
+              , we’re here to help. Drop us a message and take
+              <span className='font-bold'>
+                {" "}
+                one step closer to financial freedom!
+              </span>
             </p>
             <p className='italic text-sm text-gray-600 font-bold'>
               * Your journey to better money management starts with a simple
               message! *
-            </p><br />
+            </p>
+            <br />
           </div>
 
           <div className='card bg-base-100 w-full max-w-md shadow-xl'>
