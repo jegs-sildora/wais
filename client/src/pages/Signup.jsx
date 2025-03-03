@@ -4,7 +4,6 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import FormNav from "../components/FormNav";
 
-
 export default function Signup() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +24,7 @@ export default function Signup() {
 
     try {
       const body = { username, email, password };
-      const response = await fetch("http://192.168.253.109:3000/signup", {
+      const response = await fetch("http://192.168.155.109:3000/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

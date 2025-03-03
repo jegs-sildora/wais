@@ -135,12 +135,11 @@ app.post("/changepassword", async (req, res) => {
     ]);
 
     res.json({ message: "Password updated successfully!" });
-
   } catch (err) {
     res.status(500).json({ err: "Internal server error" });
   }
 });
 
-app.listen(3000, "192.168.253.109", () => {
+app.listen(3000, "192.168.155.109", () => {
   console.log("Listening...");
 });

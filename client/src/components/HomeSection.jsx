@@ -42,7 +42,7 @@ export default function HomeSection() {
           <div className='relative flex justify-center items-center'>
             <img
               src={phone}
-              className='motion-preset-oscillate-sm motion-ease-smooth motion-duration-[8s]'
+              className='lg:max-w-lg motion-preset-oscillate-sm motion-ease-smooth motion-duration-[6s]'
             />
             <img
               src={money}

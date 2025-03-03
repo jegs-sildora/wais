@@ -32,11 +32,11 @@ export default function ChangePassword() {
     try {
       const requestBody = {
         email: email,
-        password: password
+        password: password,
       };
 
       const response = await fetch(
-        "http://192.168.253.109:3000/changepassword",
+        "http://192.168.155.109:3000/changepassword",
         {
           method: "POST",
           headers: {
