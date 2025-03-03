@@ -42,11 +42,11 @@ export default function HomeSection() {
           <div className='relative flex justify-center items-center'>
             <img
               src={phone}
-              className='max-w-xs sm:max-w-md md:max-w-lg motion-preset-oscillate-sm motion-ease-smooth motion-duration-[8s]'
+              className='motion-preset-oscillate-sm motion-ease-smooth motion-duration-[8s]'
             />
             <img
               src={money}
-              className='absolute max-w-xs sm:max-w-md md:max-w-lg'
+              className='absolute'
             />
           </div>
         </div>
