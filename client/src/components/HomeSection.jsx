@@ -38,7 +38,7 @@ export default function HomeSection() {
             </p>
           </div>
 
-          <div className='relative flex justify-center items-center lg:max-w-sm md:max-w-md '>
+          <div className='relative flex justify-center items-center md:max-w-lg lg:max-w-lg pb-8 md:pb-0 lg:pb-0'>
             <img
               src={phone}
               className='motion-preset-oscillate-sm motion-ease-smooth motion-duration-[6s]'
