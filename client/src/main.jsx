@@ -1,15 +1,21 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Toaster } from "sonner";
 import "./index.css";
 
+//AUTH PAGES
 import Login from "./auth/Login.jsx";
 import Signup from "./auth/Signup.jsx";
 import NotFound from "./pages/NotFound.jsx";
-import Home from "./pages/Home.jsx";
 import ForgotPassword from "./auth/ForgotPassword.jsx";
 import ChangePassword from "./auth/ChangePassword.jsx";
+
+//LANDING PAGES
 import LandingPage from "./LandingPage.jsx";
+
+//MAIN PAGE
+import Home from "./main/pages/Home.jsx";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +47,13 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    <Toaster
+      richColors
+      position='top-right'
+      toastOptions={{
+        className: "font-primary text-5xl",
+      }}
+    />
     <RouterProvider router={router} />
   </StrictMode>,
 );

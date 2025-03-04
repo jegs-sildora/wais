@@ -16,7 +16,7 @@ export default function AboutSection() {
           The Simplest Way to Make the Most of Your Money
         </h1>
 
-        <div className='grid grid-cols-1 gap-8 mt-8 lg:mt-12 lg:grid-cols-2 lg:mx-auto lg:max-w-5xl'>
+        <div className='grid grid-cols-1 gap-8 mt-8 lg:mt-12 lg:grid-cols-2 lg:mx-auto lg:max-w-5xl md:grid-cols-2'>
           <div className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl bg-forest-green'>
             <span className='inline-block p-3 bg-bright-green rounded-full'>
               <svg

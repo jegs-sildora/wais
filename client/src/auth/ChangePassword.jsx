@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 export default function ChangePassword() {
   const location = useLocation();
@@ -168,14 +168,6 @@ export default function ChangePassword() {
               Log in.
             </Link>
           </p>
-
-          <Toaster
-            richColors
-            position='top-right'
-            toastOptions={{
-              className: "font-primary text-5xl",
-            }}
-          />
         </div>
       </div>
     </>

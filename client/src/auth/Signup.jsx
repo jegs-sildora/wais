@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import FormNav from "../components/FormNav";
 
 export default function Signup() {
@@ -183,13 +183,6 @@ export default function Signup() {
               </div>
             </div>
           </form>
-          <Toaster
-            richColors
-            position='top-right'
-            toastOptions={{
-              className: "font-primary text-5xl",
-            }}
-          />
         </div>
       </div>
     </>
