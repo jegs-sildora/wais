@@ -41,7 +41,7 @@ export default function ContactSection() {
                 </label>
                 <input
                   type='text'
-                  className='input input-bordered w-full'
+                  className='input input-bordered w-full rounded-2xl'
                   placeholder='John Doe'
                 />
 
@@ -50,7 +50,7 @@ export default function ContactSection() {
                 </label>
                 <input
                   type='email'
-                  className='input input-bordered w-full'
+                  className='input input-bordered w-full rounded-2xl'
                   placeholder='example@email.com'
                 />
 
@@ -58,7 +58,7 @@ export default function ContactSection() {
                   Your Finance Inquiry
                 </label>
                 <textarea
-                  className='textarea textarea-bordered w-full'
+                  className='textarea textarea-bordered w-full rounded-2xl'
                   placeholder='Write your message here...'
                   rows={4}
                 />
