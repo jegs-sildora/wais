@@ -35,16 +35,13 @@ export default function ChangePassword() {
         password: password,
       };
 
-      const response = await fetch(
-        "http://192.168.155.109:3000/changepassword",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
+      const response = await fetch("http://172.16.150.50:3000/changepassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(requestBody),
+      });
 
       const data = await response.json();
 

@@ -23,16 +23,13 @@ export default function ForgotPassword() {
         email: email,
       };
 
-      const response = await fetch(
-        "http://192.168.155.109:3000/forgotpassword",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userEmail),
+      const response = await fetch("http://172.16.150.50:3000/forgotpassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(userEmail),
+      });
 
       const data = await response.json();
 
