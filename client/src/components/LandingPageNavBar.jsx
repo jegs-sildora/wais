@@ -72,7 +72,7 @@ export default function LandingPageNavBar() {
           </div>
           <div className='navbar-center hidden lg:flex'>
             <ul className='menu menu-horizontal px-1 font-bold text-base'>
-              <li className=' hover:bg-bright-green rounded-4xl '>
+              <li className='hover:bg-bright-green rounded-4xl'>
                 <ScrollLink
                   to='home'
                   smooth={true}
@@ -81,7 +81,7 @@ export default function LandingPageNavBar() {
                   Home
                 </ScrollLink>
               </li>
-              <li className='hover:bg-bright-green rounded-4xl focus:bg-bright-green'>
+              <li className='hover:bg-bright-green rounded-4xl'>
                 <ScrollLink
                   to='about'
                   smooth={true}
