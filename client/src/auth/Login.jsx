@@ -27,7 +27,7 @@ export default function Login() {
         usernameOrEmail: usernameOrEmail,
         password: password,
       };
-      const response = await fetch("http://172.16.150.50:3000/login", {
+      const response = await fetch("http://192.168.200.109:3000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export default function Login() {
 
       if (response.ok) {
         toast.success("Log in successfully!");
-        setTimeout(() => navigate("/"), 3000);
+        setTimeout(() => navigate("/home"), 1500);
       } else {
         toast.error(data.error || "Invalid credentials, please try again.");
       }
@@ -82,7 +82,6 @@ export default function Login() {
                   type='text'
                   name='email'
                   placeholder='sample@sample.com'
-                  required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green'
                   value={usernameOrEmail}

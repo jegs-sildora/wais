@@ -7,10 +7,10 @@ export default function ContactSection() {
       <div className='hero'>
         <div className='hero-content flex-col lg:flex-row-reverse lg:gap-20'>
           <div className='text-center lg:text-left'>
-            <h1 className='text-3xl lg:text-5xl font-black text-forest-green'>
+            <h1 className='text-3xl lg:text-6xl font-black text-forest-green uppercase'>
               Got Money Matters? <br /> Let's Talk!
             </h1>
-            <p className='py-6 text-md lg:text-lg text-forest-green'>
+            <p className='py-6 text-md lg:text-xl text-forest-green'>
               Whether you have questions about{" "}
               <span className='font-bold'>
                 budgeting smarter, tracking expenses, or making the most of{" "}
@@ -22,7 +22,7 @@ export default function ContactSection() {
                 one step closer to financial freedom!
               </span>
             </p>
-            <p className='italic text-sm text-gray-600 font-bold'>
+            <p className='italic text-sm lg:text-md text-gray-600 font-bold'>
               * Your journey to better money management starts with a simple
               message! *
             </p>

@@ -3,13 +3,13 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 
-import LandingPage from "./LandingPage.jsx";
-import Login from "./pages/Login.jsx";
-import Signup from "./pages/Signup.jsx";
+import Login from "./auth/Login.jsx";
+import Signup from "./auth/Signup.jsx";
 import NotFound from "./pages/NotFound.jsx";
-import HomePage from "./pages/HomePage.jsx";
-import ForgotPassword from "./pages/ForgotPassword.jsx";
-import ChangePassword from "./pages/ChangePassword.jsx";
+import Home from "./pages/Home.jsx";
+import ForgotPassword from "./auth/ForgotPassword.jsx";
+import ChangePassword from "./auth/ChangePassword.jsx";
+import LandingPage from "./LandingPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -26,8 +26,8 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
-    path: "/homepage",
-    element: <HomePage />,
+    path: "/home",
+    element: <Home />,
   },
   {
     path: "/forgotpassword",

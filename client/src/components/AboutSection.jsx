@@ -12,7 +12,7 @@ export default function AboutSection() {
       />
 
       <div className='container px-6 py-16 lg:py-0 mx-auto'>
-        <h1 className='text-3xl font-black text-center uppercase lg:text-5xl'>
+        <h1 className='text-3xl font-black text-center uppercase lg:text-5xl lg:py-8'>
           The Simplest Way to Make the Most of Your Money
         </h1>
 
@@ -85,9 +85,10 @@ export default function AboutSection() {
             </h1>
 
             <p className='text-gray-300 text-md'>
-              Easily manage finances with <span className="font-bold text-white">WAIS</span>! Organize transactions, set
-              spending limits, and track every peso in one place. No stress,
-              just smart budgeting!
+              Easily manage finances with{" "}
+              <span className='font-bold text-white'>WAIS!</span> Organize
+              transactions, set spending limits, and track every peso in one
+              place. No stress, just smart budgeting!
             </p>
 
             <a
