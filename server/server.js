@@ -12,7 +12,9 @@ app.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res.status(400).json({ error: "All field are required! " });
+    return res
+      .status(400)
+      .json({ error: "All field are required! Please try again." });
   }
 
   try {
@@ -21,7 +23,9 @@ app.post("/signup", async (req, res) => {
       [email],
     );
     if (useremailCheck.rows.length > 0) {
-      return res.status(400).json({ error: "Email is already in use!" });
+      return res
+        .status(400)
+        .json({ error: "Email is already in use! Please try again." });
     }
 
     const usernameCheck = await pool.query(
@@ -29,7 +33,9 @@ app.post("/signup", async (req, res) => {
       [username],
     );
     if (usernameCheck.rows.length > 0) {
-      return res.status(400).json({ error: "Username is already taken!" });
+      return res
+        .status(400)
+        .json({ error: `Username is already taken! Please try again.` });
     }
 
     const salt = await bcrypt.genSalt(10);

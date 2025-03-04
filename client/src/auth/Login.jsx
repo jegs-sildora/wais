@@ -37,12 +37,15 @@ export default function Login() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        toast.success("Log in successfully!");
-        setTimeout(() => navigate("/home"), 1500);
-      } else {
-        toast.error(data.error || "Invalid credentials, please try again.");
-      }
+      setTimeout(() => {
+        if (response.ok) {
+          toast.success("Log in successfully!");
+          setTimeout(() => navigate("/home"), 1500);
+        } else {
+          toast.error(data.error || "Invalid credentials, please try again.");
+        }
+        setLoading(false);
+      })
     } catch (err) {
       console.error("Login failed", err);
       toast.error("An error occurred. Please try again.");
@@ -53,9 +56,9 @@ export default function Login() {
 
   return (
     <>
-      <FormNav title={"WAIS."} />
-      <div className='flex flex-col h-screen justify-center px-6 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
-        <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
+      <FormNav title={"WAIS."} textClassName="text-3xl lg:text-5xl"/>
+      <div className='flex flex-col h-screen justify-center px-6 pt-26 md:pt-0 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
+        <div>
           <img
             className='mx-auto h-20 w-auto motion-preset-focus motion-preset-oscillate motion-safe:motion-ease-spring-smooth'
             src={logo}
@@ -65,7 +68,7 @@ export default function Login() {
           </h2>
         </div>
 
-        <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
+        <div className='mt-10 sm:mx-auto md:w-full md:max-w-md'>
           <form
             className='space-y-6'
             onSubmit={handleSubmit}

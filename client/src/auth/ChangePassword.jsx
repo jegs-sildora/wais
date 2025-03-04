@@ -65,7 +65,7 @@ export default function ChangePassword() {
   return (
     <>
       <div className='flex flex-col h-screen justify-center px-6 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
-        <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
+        <div className='sm:mx-auto sm:w-full sm:max-w-sm '>
           <h2 className='text-left text-2xl font-bold tracking-tight text-forest-green'>
             Change Password
           </h2>

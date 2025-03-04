@@ -17,7 +17,7 @@ export default function Signup() {
     setLoading(true);
 
     if (!username || !email || !password) {
-      toast.error("Please fill in all fields.");
+      toast.error("Please fill in all fields. Please try again.");
       setLoading(false);
       return;
     }
@@ -36,8 +36,8 @@ export default function Signup() {
         if (response.ok) {
           toast.success("Account created successfully!");
           setTimeout(() => {
-            navigate("/login");
-          }, 3000);
+            navigate("/home");
+          }, 1500);
         } else {
           toast.error(data.error || "Signup failed. Please try again.");
         }
@@ -76,7 +76,7 @@ export default function Signup() {
             </Link>
           </p>
         </div>
-        <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
+        <div className='mt-10 sm:mx-auto md:w-full md:max-w-md'>
           <form
             className='space-y-6'
             onSubmit={onCreateAccount}
@@ -94,7 +94,6 @@ export default function Signup() {
                   name='username'
                   id='username'
                   placeholder='sample'
-                  required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
                   value={username}
@@ -115,7 +114,6 @@ export default function Signup() {
                   name='email'
                   id='email'
                   placeholder='sample@sample.com'
-                  required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 input validator'
                   value={email}
@@ -139,7 +137,6 @@ export default function Signup() {
                   name='password'
                   id='password'
                   placeholder='········'
-                  required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
                   value={password}
@@ -162,13 +159,15 @@ export default function Signup() {
             <div>
               <button
                 type='submit'
+                className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
+                  loading ? "cursor-not-allowed opacity-50" : ""
+                }`}
                 disabled={loading}
-                className='flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10'
               >
-                {loading ? "Creating account..." : "Create account"}
+                {loading ? "Creating account..." : "Create Account"}
               </button>
 
-              <div className='flex  mt-5'>
+              <div className='flex mt-5'>
                 <label
                   htmlFor='terms'
                   className='text-xs lg:text-sm text-forest-green'

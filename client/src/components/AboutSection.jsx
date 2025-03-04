@@ -8,7 +8,7 @@ export default function AboutSection() {
     >
       <img
         src={wave}
-        className='absolute top-0 left-0 w-full -mt-6 lg:-mt-24 drop-shadow-2xl'
+        className='absolute top-0 left-0 w-full -mt-6 md:-mt-14 lg:-mt-24 drop-shadow-2xl'
       />
 
       <div className='container px-6 py-16 lg:py-0 mx-auto'>

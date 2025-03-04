@@ -5,7 +5,7 @@ export default function LandingPageNavBar() {
   return (
     <>
       <nav>
-        <div className='fixed top-0 left-0 w-full z-50 navbar shadow-sm md:px-20 bg-white'>
+        <div className='fixed top-0 left-0 w-full z-50 navbar shadow-sm lg:px-20 bg-white'>
           <div className='navbar-start'>
             <div className='dropdown'>
               <div
