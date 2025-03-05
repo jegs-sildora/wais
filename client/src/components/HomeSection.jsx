@@ -55,7 +55,7 @@ export default function HomeSection() {
             />
             <img
               src={money}
-              className='absolute'
+              className='absolute motion-preset-oscillate-sm motion-ease-smooth motion-duration-[6s] motion-delay-[0.52s]'
             />
           </div>
         </div>
