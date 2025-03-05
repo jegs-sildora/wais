@@ -94,9 +94,9 @@ export default function Signup() {
                   type='text'
                   name='username'
                   id='username'
-                  placeholder='sample'
+                  placeholder='Enter username'
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green placeholder:text-base'
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -114,9 +114,9 @@ export default function Signup() {
                   type='email'
                   name='email'
                   id='email'
-                  placeholder='sample@sample.com'
+                  placeholder='Enter email address'
                   autoComplete='off'
-                  className='input validator block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2'
+                  className='input validator block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 placeholder:text-base'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -137,9 +137,9 @@ export default function Signup() {
                   type={showPassword ? "text" : "password"}
                   name='password'
                   id='password'
-                  placeholder='········'
+                  placeholder='Enter password'
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green  placeholder:text-base'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />

@@ -82,9 +82,9 @@ export default function ForgotPassword() {
                 <input
                   type='email'
                   name='email'
-                  placeholder='sample@sample.com'
+                  placeholder='Enter email'
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green input validator'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green input validator  placeholder:text-base'
                   value={email}
                   onChange={(e) => dataEmail(e.target.value)}
                 />

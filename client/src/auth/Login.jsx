@@ -87,9 +87,9 @@ export default function Login() {
                 <input
                   type='text'
                   name='email'
-                  placeholder='sample@sample.com'
+                  placeholder='Enter username or email address'
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green  placeholder:text-base'
                   value={usernameOrEmail}
                   onChange={(e) => dataUsernameOrEmail(e.target.value)}
                 />
@@ -117,9 +117,9 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name='password'
-                  placeholder='********'
+                  placeholder='Enter password'
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green pr-10'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green pr-10 placeholder:text-base'
                   value={password}
                   onChange={(e) => dataPassword(e.target.value)}
                 />

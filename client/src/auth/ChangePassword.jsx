@@ -3,6 +3,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as motion from "motion/react-client";
+import FormNav from "../components/FormNav";
 
 export default function ChangePassword() {
   const location = useLocation();
@@ -65,6 +66,10 @@ export default function ChangePassword() {
 
   return (
     <>
+      <FormNav
+        title={"BACK"}
+        textClassName='text-2xl'
+      />
       <div className='flex flex-col h-screen justify-center px-6 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm '>
           <h2 className='text-left text-2xl font-bold tracking-tight text-forest-green'>
@@ -91,10 +96,10 @@ export default function ChangePassword() {
                   type={showPassword ? "text" : "password"}
                   name='password'
                   id='password'
-                  placeholder='········'
+                  placeholder='Enter password'
                   required
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green  placeholder:text-base'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -126,10 +131,10 @@ export default function ChangePassword() {
                   type={showConfirmPassword ? "text" : "password"}
                   name='password'
                   id='password'
-                  placeholder='········'
+                  placeholder='Enter confirm password'
                   required
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green'
+                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 focus:outline-forest-green ring-forest-green  placeholder:text-base'
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
