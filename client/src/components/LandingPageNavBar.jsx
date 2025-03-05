@@ -1,5 +1,6 @@
 import { Link as RouterLink } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
+import * as motion from "motion/react-client";
 
 export default function LandingPageNavBar() {
   return (
@@ -72,42 +73,60 @@ export default function LandingPageNavBar() {
           </div>
           <div className='navbar-center hidden lg:flex'>
             <ul className='menu menu-horizontal px-1 font-bold text-base'>
-              <li className='hover:bg-bright-green rounded-4xl'>
+              <motion.li
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.99 }}
+                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+              >
                 <ScrollLink
                   to='home'
                   smooth={true}
-                  duration={800}
+                  duration={1600}
                 >
                   Home
                 </ScrollLink>
-              </li>
-              <li className='hover:bg-bright-green rounded-4xl'>
+              </motion.li>
+              <motion.li
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.99 }}
+                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+              >
                 <ScrollLink
                   to='about'
                   smooth={true}
-                  duration={800}
+                  duration={1600}
                 >
                   About
                 </ScrollLink>
-              </li>
-              <li className='hover:bg-bright-green rounded-4xl'>
+              </motion.li>
+              <motion.li
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.99 }}
+                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+              >
                 <ScrollLink
                   to='contact'
                   smooth={true}
-                  duration={800}
+                  duration={1600}
                 >
                   Contact Us
                 </ScrollLink>
-              </li>
+              </motion.li>
             </ul>
           </div>
           <div className='navbar-end'>
-            <RouterLink
-              to='/login'
-              className='btn rounded-4xl text-base bg-bright-green hover:bg-bright-green-hover font-bold'
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.99 }}
+              className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
             >
-              Get Started
-            </RouterLink>
+              <RouterLink
+                to='/login'
+                className='btn rounded-4xl text-base bg-bright-green hover:bg-bright-green-hover font-bold'
+              >
+                Get Started
+              </RouterLink>
+            </motion.div>
           </div>
         </div>
       </nav>

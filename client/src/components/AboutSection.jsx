@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import wave from "../assets/wave.svg";
 
 export default function AboutSection() {
@@ -11,14 +12,32 @@ export default function AboutSection() {
         className='absolute top-0 left-0 w-full -mt-6 md:-mt-14 lg:-mt-24 drop-shadow-2xl'
       />
 
-      <div className='container px-6 py-16 lg:py-0 mx-auto'>
-        <h1 className='text-3xl font-black text-center uppercase lg:text-5xl lg:py-8'>
+      <motion.div
+        initial={{
+          opacity: 0,
+        }}
+        whileInView={{
+          opacity: 1,
+        }}
+        viewport={{
+          amount: "all",
+          once: true,
+        }}
+        className='container px-6 py-16 lg:py-0 mx-auto'
+      >
+        <motion.h1
+          initial='hidden'
+          className='text-3xl font-black text-center uppercase lg:text-5xl lg:py-8'
+        >
           The Simplest Way to Make the Most of Your Money
-        </h1>
+        </motion.h1>
 
         <div className='grid grid-cols-1 gap-8 mt-8 lg:mt-12 lg:grid-cols-2 lg:mx-auto lg:max-w-5xl md:grid-cols-2'>
-          <div className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl bg-forest-green'>
-            <span className='inline-block p-3 bg-bright-green rounded-full'>
+          <motion.div
+            initial='hidden'
+            className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl outline-4 outline-forest-green'
+          >
+            <span className='inline-block p-3 bg-bright-green rounded-full outline-4'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 className='w-6 h-6'
@@ -31,11 +50,11 @@ export default function AboutSection() {
               </svg>
             </span>
 
-            <h1 className='text-xl font-semibold uppercase text-white'>
+            <h1 className='text-xl font-semibold uppercase'>
               Master Your Money
             </h1>
 
-            <p className='text-gray-300 text-md'>
+            <p className='text-md'>
               Track income, log expenses, and categorize transactions
               effortlessly. Set budgets, monitor spending, and stay in
               control—your money, your rules!
@@ -43,7 +62,7 @@ export default function AboutSection() {
 
             <a
               href='#'
-              className='flex items-center -mx-1 text-sm text-bright-green capitalize transform hover:underline font-bold'
+              className='flex items-center -mx-1 text-sm capitalize transform hover:underline font-bold decoration-2'
             >
               <span className='mx-1'>read more</span>
               <svg
@@ -59,10 +78,13 @@ export default function AboutSection() {
                 ></path>
               </svg>
             </a>
-          </div>
+          </motion.div>
 
-          <div className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl bg-forest-green'>
-            <span className='inline-block p-3 bg-bright-green rounded-full'>
+          <motion.div
+            initial='hidden'
+            className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl outline-4 outline-forest-green'
+          >
+            <span className='inline-block p-3 bg-bright-green rounded-full outline-4'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 width='24'
@@ -80,20 +102,18 @@ export default function AboutSection() {
               </svg>
             </span>
 
-            <h1 className='text-xl font-semibold uppercase text-white'>
-              Spend Smarter
-            </h1>
+            <h1 className='text-xl font-semibold uppercase'>Spend Smarter</h1>
 
-            <p className='text-gray-300 text-md'>
+            <p className='text-md'>
               Easily manage finances with{" "}
-              <span className='font-bold text-white'>WAIS!</span> Organize
-              transactions, set spending limits, and track every peso in one
-              place. No stress, just smart budgeting!
+              <span className='font-bold'>WAIS!</span> Organize transactions,
+              set spending limits, and track every peso in one place. No stress,
+              just smart budgeting!
             </p>
 
             <a
               href='#'
-              className='flex items-center -mx-1 text-sm text-bright-green capitalize transform hover:underline font-bold'
+              className='flex items-center -mx-1 text-sm capitalize transform hover:underline decoration-2 font-bold'
             >
               <span className='mx-1'>read more</span>
               <svg
@@ -109,9 +129,9 @@ export default function AboutSection() {
                 ></path>
               </svg>
             </a>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -4,14 +4,14 @@ export default function ContactSection() {
       id='contact'
       className='relative flex justify-center items-center lg:h-screen text-forest-green bg-[url("/src/assets/blob-3-vert.svg")] md:bg-[url("/src/assets/blob-3.svg")] lg:bg-[url("/src/assets/blob-3.svg")] bg-cover bg-right-bottom lg:-mt-18'
     >
-      <div className='hero'>
+      <div className='hero lg:mt-16'>
         <div className='hero-content flex-col lg:flex-row-reverse lg:gap-20'>
           <div className='text-center lg:text-left'>
-            <h1 className='text-3xl md:text-5xl lg:text-6xl font-black text-forest-green uppercase'>
+            <h1 className='text-3xl md:text-5xl lg:text-5xl font-black text-forest-green uppercase '>
               Got Money Matters? <br /> Let's Talk!
             </h1>
-            <div className='max-w-2xl lg:max-w-xl'>
-              <p className='py-6 text-md lg:text-xl text-forest-green'>
+            <div className='max-w-2xl lg:max-w-5xl'>
+              <p className='py-6 text-base lg:text-xl text-forest-green'>
                 Whether you have questions about{" "}
                 <span className='font-bold'>
                   budgeting smarter, tracking expenses, or making the most of{" "}
@@ -31,8 +31,8 @@ export default function ContactSection() {
             <br />
           </div>
 
-          <div className='card bg-base-100 w-full max-w-md md:max-w-lg shadow-xl'>
-            <div className='card-body'>
+          <div className='card bg-base-100 w-full max-w-md md:max-w-lg'>
+            <div className='card-body outline-4 rounded-4xl drop-shadow-sm'>
               <h2 className='text-2xl lg:text-3xl font-extrabold text-center mb-4'>
                 SEND A MESSAGE
               </h2>

@@ -1,7 +1,8 @@
-import { StrictMode } from "react";
+import { StrictMode, useRef, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Toaster } from "sonner";
+import Lenis from "@studio-freight/lenis";
 import "./index.css";
 
 //AUTH PAGES
@@ -45,15 +46,44 @@ const router = createBrowserRouter([
   }
 ]);
 
+function App() {
+  const lenis = useRef(null);
+  useEffect(() => {
+    lenis.current = new Lenis({
+      duration: 1.5,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+      smooth: true,
+      smoothTouch: true,
+    });
+
+    const animate = (time) => {
+      lenis.current.raf(time);
+      requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+
+    return () => {
+      lenis.current.destroy();
+    };
+  }, []);
+
+  return (
+    <>
+      <Toaster
+        richColors
+        position='top-right'
+        toastOptions={{
+          className: "font-primary text-5xl",
+        }}
+      />
+      <RouterProvider router={router} />
+    </>
+  );
+}
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Toaster
-      richColors
-      position='top-right'
-      toastOptions={{
-        className: "font-primary text-5xl",
-      }}
-    />
-    <RouterProvider router={router} />
+    <App />
   </StrictMode>,
 );
