@@ -3,20 +3,14 @@ import { easeIn, motion } from "framer-motion";
 import money from "../assets/money.svg";
 import phone from "../assets/phone.png";
 
-const containerVariants = {
-  hidden: { opacity: 0, x: -100 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.9 }, ease: easeIn},
-};
-
 export default function HomeSection() {
   return (
     <section
       id='home'
       className='flex justify-center items-center text-forest-green font-medium bg-[url("/src/assets/waves_bg.svg")] bg-cover bg-center py-8 md:py-0 lg:py-0 min-h-screen md:min-h-screen lg:min-h-screen'
     >
-      <motion.div
-        className='hero'
-        variants={containerVariants}
+      <div
+        className='hero intersect-once intersect:motion-preset-fade intersect:motion-preset-blur-right intersect:motion-opacity-in-0 intersect:-motion-translate-x-in-[100px] intersect:motion-ease-spring-smooth intersect:motion-duration-[1s]'
         initial='hidden'
         animate='visible'
       >
@@ -65,7 +59,7 @@ export default function HomeSection() {
             />
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

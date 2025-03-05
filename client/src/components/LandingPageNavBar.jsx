@@ -76,7 +76,7 @@ export default function LandingPageNavBar() {
               <motion.li
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.99 }}
-                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in'
               >
                 <ScrollLink
                   to='home'
@@ -89,7 +89,7 @@ export default function LandingPageNavBar() {
               <motion.li
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.99 }}
-                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in'
               >
                 <ScrollLink
                   to='about'
@@ -102,7 +102,7 @@ export default function LandingPageNavBar() {
               <motion.li
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.99 }}
-                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+                className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in'
               >
                 <ScrollLink
                   to='contact'
@@ -118,7 +118,7 @@ export default function LandingPageNavBar() {
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.99 }}
-              className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm'
+              className='hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in'
             >
               <RouterLink
                 to='/login'
