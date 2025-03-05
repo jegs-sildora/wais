@@ -51,11 +51,11 @@ export default function HomeSection() {
           <div className='relative flex justify-center items-center md:max-w-lg lg:max-w-lg pb-8 md:pb-0 lg:pb-0'>
             <img
               src={phone}
-              className='motion-preset-oscillate-sm motion-ease-smooth motion-duration-[6s] motion-delay-500'
+              className='motion-preset-oscillate-sm motion-ease-smooth motion-duration-[5s] motion-delay-500'
             />
             <img
               src={money}
-              className='absolute motion-preset-oscillate-sm motion-ease-smooth motion-duration-[6s] motion-delay-[0.52s]'
+              className='absolute motion-preset-oscillate-sm motion-ease-smooth motion-duration-[5s] motion-delay-[0.75s]'
             />
           </div>
         </div>

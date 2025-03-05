@@ -31,7 +31,7 @@ export default function AboutSection() {
               </svg>
             </span>
 
-            <h1 className='text-xl font-semibold uppercase '>
+            <h1 className='text-xl font-extrabold uppercase '>
               Master Your Money
             </h1>
 
@@ -61,7 +61,7 @@ export default function AboutSection() {
             </a>
           </div>
 
-          <div className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl outline-4 outline-forest-green intersect-once intersect:motion-scale-in-[0.5] intersect:motion-opacity-in-[0%] intersect:motion-delay-1000'>
+          <div className='flex flex-col items-center p-6 space-y-3 text-center rounded-xl outline-4 outline-forest-green intersect-once intersect:motion-scale-in-[0.5] intersect:motion-opacity-in-[0%] intersect:motion-delay-900'>
             <span className='inline-block p-3 bg-bright-green rounded-full outline-4 '>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
@@ -80,7 +80,7 @@ export default function AboutSection() {
               </svg>
             </span>
 
-            <h1 className='text-xl font-semibold uppercase '>Spend Smarter</h1>
+            <h1 className='text-xl font-extrabold uppercase '>Spend Smarter</h1>
 
             <p className='text-md '>
               Easily manage finances with{" "}
