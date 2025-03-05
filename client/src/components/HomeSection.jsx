@@ -17,8 +17,7 @@ export default function HomeSection() {
       <motion.div
         className='hero'
         variants={containerVariants}
-        initial='hidden'
-        animate='visible'
+
       >
         <div className='hero-content flex flex-col lg:flex-row items-center text-center lg:text-left gap-10 lg:gap-20 pt-10 lg:mt-0 md:-mt-20'>
           <div className='max-w-2xl p-6'>
