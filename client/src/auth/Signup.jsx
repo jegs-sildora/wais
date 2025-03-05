@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toast } from "sonner";
+import * as motion from "motion/react-client";
 import FormNav from "../components/FormNav";
 
 export default function Signup() {
@@ -17,7 +18,7 @@ export default function Signup() {
     setLoading(true);
 
     if (!username || !email || !password) {
-      toast.error("Please fill in all fields. Please try again.");
+      toast.error("Please fill in all fields.");
       setLoading(false);
       return;
     }
@@ -115,7 +116,7 @@ export default function Signup() {
                   id='email'
                   placeholder='sample@sample.com'
                   autoComplete='off'
-                  className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 input validator'
+                  className='input validator block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder:text-gray-400 outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -157,7 +158,9 @@ export default function Signup() {
             </div>
 
             <div>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.99 }}
                 type='submit'
                 className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
                   loading ? "cursor-not-allowed opacity-50" : ""
@@ -165,7 +168,7 @@ export default function Signup() {
                 disabled={loading}
               >
                 {loading ? "Creating account..." : "Create Account"}
-              </button>
+              </motion.button>
 
               <div className='flex mt-5'>
                 <label

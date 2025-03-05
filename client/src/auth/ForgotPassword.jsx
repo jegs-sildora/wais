@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
+import * as motion from "motion/react-client";
 import FormNav from "../components/FormNav";
 
 export default function ForgotPassword() {
@@ -82,7 +83,6 @@ export default function ForgotPassword() {
                   type='email'
                   name='email'
                   placeholder='sample@sample.com'
-                  required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green input validator'
                   value={email}
@@ -91,7 +91,10 @@ export default function ForgotPassword() {
               </div>
             </div>
 
-            <div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.99 }}
+            >
               <button
                 type='submit'
                 className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
@@ -101,7 +104,7 @@ export default function ForgotPassword() {
               >
                 {loading ? "Searching..." : "Search"}
               </button>
-            </div>
+            </motion.div>
           </form>
 
           <p className='mt-5 text-center text-base text-forest-green'>

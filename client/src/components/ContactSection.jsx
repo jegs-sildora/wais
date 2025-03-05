@@ -4,7 +4,7 @@ export default function ContactSection() {
       id='contact'
       className='relative flex justify-center items-center lg:h-screen text-forest-green bg-[url("/src/assets/blob-3-vert.svg")] md:bg-[url("/src/assets/blob-3.svg")] lg:bg-[url("/src/assets/blob-3.svg")] bg-cover bg-right-bottom lg:-mt-18'
     >
-      <div className='hero lg:mt-16'>
+      <div className='hero lg:mt-16 intersect-once intersect:motion-preset-fade intersect:motion-opacity-in-0 intersect:-motion-translate-x-in-25 intersect:motion-delay-600 intersect:motion-ease-spring-smooth'>
         <div className='hero-content flex-col lg:flex-row-reverse lg:gap-20'>
           <div className='text-center lg:text-left'>
             <h1 className='text-3xl md:text-5xl lg:text-5xl font-black text-forest-green uppercase '>

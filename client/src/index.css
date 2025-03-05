@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui";
 @plugin "tailwindcss-motion";
+@import "tailwindcss-intersect";
 
 @layer utilities {
   @media (min-width: 1024px) { 

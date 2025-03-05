@@ -2,6 +2,7 @@ import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
+import * as motion from "motion/react-client";
 import FormNav from "../components/FormNav";
 import logo from "../assets/logo.png";
 
@@ -17,7 +18,7 @@ export default function Login() {
     setLoading(true);
 
     if (!usernameOrEmail || !password) {
-      toast.error("Please fill in all fields.");
+      toast.error("Please fill in all fields!");
       setLoading(false);
       return;
     }
@@ -40,11 +41,10 @@ export default function Login() {
       setTimeout(() => {
         if (response.ok) {
           toast.success("Log in successfully!");
-          setTimeout(() => navigate("/home"), 1500);
+          setTimeout(() => navigate("/home"), 2500);
         } else {
           toast.error(data.error || "Invalid credentials, please try again.");
         }
-        setLoading(false);
       });
     } catch (err) {
       console.error("Login failed", err);
@@ -57,7 +57,7 @@ export default function Login() {
   return (
     <>
       <FormNav
-        title={"WAIS."}
+        title={"WAIS"}
         textClassName='text-3xl lg:text-5xl'
       />
       <div className='flex flex-col h-screen justify-center px-6 pt-26 md:pt-0 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
@@ -118,7 +118,6 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   name='password'
                   placeholder='********'
-                  required
                   autoComplete='off'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-lg text-forest-green placeholder-gray-400 outline-1 focus:outline-2 focus:outline-forest-green pr-10'
                   value={password}
@@ -138,17 +137,20 @@ export default function Login() {
               </div>
             </div>
 
-            <div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.99 }}
+            >
               <button
                 type='submit'
-                className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
+                className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-greenh  hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
                   loading ? "cursor-not-allowed opacity-50" : ""
                 }`}
                 disabled={loading}
               >
                 {loading ? "Logging in..." : "Log in"}
               </button>
-            </div>
+            </motion.div>
           </form>
 
           <p className='mt-5 text-center text-base text-forest-green'>

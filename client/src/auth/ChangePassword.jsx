@@ -2,6 +2,7 @@ import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import * as motion from "motion/react-client";
 
 export default function ChangePassword() {
   const location = useLocation();
@@ -146,7 +147,10 @@ export default function ChangePassword() {
               </div>
             </div>
 
-            <div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.99 }}
+            >
               <button
                 type='submit'
                 className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
@@ -156,7 +160,7 @@ export default function ChangePassword() {
               >
                 {loading ? "Searching..." : "Search"}
               </button>
-            </div>
+            </motion.div>
           </form>
 
           <p className='mt-5 text-center text-base text-forest-green'>

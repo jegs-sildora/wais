@@ -17,6 +17,7 @@ import LandingPage from "./LandingPage.jsx";
 
 //MAIN PAGE
 import Home from "./main/pages/Home.jsx";
+import ObserverProvider from "./components/ObserverProvider.jsx";
 
 const router = createBrowserRouter([
   {
@@ -42,8 +43,8 @@ const router = createBrowserRouter([
   },
   {
     path: "/changepassword",
-    element: <ChangePassword />
-  }
+    element: <ChangePassword />,
+  },
 ]);
 
 function App() {
@@ -70,14 +71,16 @@ function App() {
 
   return (
     <>
-      <Toaster
-        richColors
-        position='top-right'
-        toastOptions={{
-          className: "font-primary text-5xl",
-        }}
-      />
-      <RouterProvider router={router} />
+      <ObserverProvider>
+        <Toaster
+          richColors
+          position='top-right'
+          toastOptions={{
+            className: "font-primary text-5xl",
+          }}
+        />
+        <RouterProvider router={router} />
+      </ObserverProvider>
     </>
   );
 }
