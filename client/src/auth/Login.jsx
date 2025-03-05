@@ -27,7 +27,7 @@ export default function Login() {
         usernameOrEmail: usernameOrEmail,
         password: password,
       };
-      const response = await fetch("http://192.168.200.109:3000/login", {
+      const response = await fetch("http://192.168.254.109:3000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export default function Login() {
           toast.error(data.error || "Invalid credentials, please try again.");
         }
         setLoading(false);
-      })
+      });
     } catch (err) {
       console.error("Login failed", err);
       toast.error("An error occurred. Please try again.");
@@ -56,7 +56,10 @@ export default function Login() {
 
   return (
     <>
-      <FormNav title={"WAIS."} textClassName="text-3xl lg:text-5xl"/>
+      <FormNav
+        title={"WAIS."}
+        textClassName='text-3xl lg:text-5xl'
+      />
       <div className='flex flex-col h-screen justify-center px-6 pt-26 md:pt-0 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div>
           <img
