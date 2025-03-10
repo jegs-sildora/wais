@@ -51,7 +51,7 @@ function App() {
   const lenis = useRef(null);
   useEffect(() => {
     lenis.current = new Lenis({
-      duration: 1.5,
+      duration: 0.5,
       easing: (t) => 1 - Math.pow(1 - t, 3),
       smooth: true,
       smoothTouch: true,

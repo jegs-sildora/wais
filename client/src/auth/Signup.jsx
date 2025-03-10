@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { toast } from "sonner";
-import * as motion from "motion/react-client";
-import FormNav from "../components/FormNav";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import * as motion from 'motion/react-client';
+import FormNav from '../components/FormNav';
 
 export default function Signup() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,16 +18,16 @@ export default function Signup() {
     setLoading(true);
 
     if (!username || !email || !password) {
-      toast.error("Please fill in all fields.");
+      toast.error('Please fill in all fields.');
       setLoading(false);
       return;
     }
 
     try {
       const body = { username, email, password };
-      const response = await fetch("http://192.168.254.109:3000/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('http://192.168.117.109:3000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -35,28 +35,25 @@ export default function Signup() {
 
       setTimeout(() => {
         if (response.ok) {
-          toast.success("Account created successfully!");
+          toast.success('Account created successfully!');
           setTimeout(() => {
-            navigate("/home");
+            navigate('/home');
           }, 1500);
         } else {
-          toast.error(data.error || "Signup failed. Please try again.");
+          toast.error(data.error || 'Signup failed. Please try again.');
         }
         setLoading(false);
       }, 1000);
     } catch (err) {
       console.error(err.message);
-      toast.error("Something went wrong. Please try again.");
+      toast.error('Something went wrong. Please try again.');
       setLoading(false);
     }
   };
 
   return (
     <>
-      <FormNav
-        title={"BACK"}
-        textClassName='text-2xl'
-      />
+      <FormNav title={'BACK'} textClassName='text-2xl' />
 
       <div className='flex flex-col h-screen justify-center px-6 py-12 lg:px-8 lg:py-0 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
@@ -69,19 +66,13 @@ export default function Signup() {
           </h2>
           <p className='mt-2 text-center text-base font-light text-forest-green'>
             Already have an account?&nbsp;
-            <Link
-              to='/login'
-              className='font-bold underline'
-            >
+            <Link to='/login' className='font-bold underline'>
               Log in.
             </Link>
           </p>
         </div>
         <div className='mt-10 sm:mx-auto md:w-full md:max-w-md'>
-          <form
-            className='space-y-6'
-            onSubmit={onCreateAccount}
-          >
+          <form className='space-y-6' onSubmit={onCreateAccount}>
             <div>
               <label
                 htmlFor='username'
@@ -134,7 +125,7 @@ export default function Signup() {
               </div>
               <div className='relative mt-2'>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   name='password'
                   id='password'
                   placeholder='Enter password'
@@ -163,11 +154,11 @@ export default function Signup() {
                 whileTap={{ scale: 0.99 }}
                 type='submit'
                 className={`flex w-full justify-center rounded-4xl bg-bright-green px-3 py-1.5 text-lg font-bold text-forest-green shadow-xs outline-3 outline-offset-3 outline-forest-green hover:bg-bright-green-hover hover:text-forest-green focus-visible:outline-2 focus-visible:outline-offset-2 mt-10 ${
-                  loading ? "cursor-not-allowed opacity-50" : ""
+                  loading ? 'cursor-not-allowed opacity-50' : ''
                 }`}
                 disabled={loading}
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {loading ? 'Creating account...' : 'Create Account'}
               </motion.button>
 
               <div className='flex mt-5'>
@@ -176,10 +167,7 @@ export default function Signup() {
                   className='text-xs lg:text-sm text-forest-green'
                 >
                   By registering, you accept our&nbsp;
-                  <a
-                    href='#'
-                    className='text-forest-green underline font-bold'
-                  >
+                  <a href='#' className='text-forest-green underline font-bold'>
                     terms and conditions.
                   </a>
                 </label>
