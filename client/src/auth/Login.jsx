@@ -28,7 +28,7 @@ export default function Login() {
         usernameOrEmail: usernameOrEmail,
         password: password,
       };
-      const response = await fetch('http://192.168.117.109:3000/login', {
+      const response = await fetch('http://192.168.47.109:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

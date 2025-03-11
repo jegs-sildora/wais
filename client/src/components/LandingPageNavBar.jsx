@@ -1,14 +1,38 @@
 import { Link as RouterLink } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as motion from "motion/react-client";
 
 export default function LandingPageNavBar() {
   const [active, setActive] = useState("home");
+  const sectionsRef = useRef({});
 
   const handleSetActive = (to) => {
     setActive(to);
   };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+
+    const sections = document.querySelectorAll("section");
+    sections.forEach((section) => {
+      observer.observe(section);
+      sectionsRef.current[section.id] = section;
+    });
+
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+    };
+  }, []);
 
   return (
     <>

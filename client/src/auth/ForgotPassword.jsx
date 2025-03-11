@@ -25,7 +25,7 @@ export default function ForgotPassword() {
       };
 
       const response = await fetch(
-        'http://192.168.117.109:3000/forgotpassword',
+        'http://192.168.47.109:3000/forgotpassword',
         {
           method: 'POST',
           headers: {
