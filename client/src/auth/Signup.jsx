@@ -25,7 +25,7 @@ export default function Signup() {
 
     try {
       const body = { username, email, password };
-      const response = await fetch('http://192.168.47.109:3000/signup', {
+      const response = await fetch('http://192.168.14.109:3000/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -53,7 +53,7 @@ export default function Signup() {
 
   return (
     <>
-      <FormNav title={'BACK'} textClassName='text-2xl' />
+      <FormNav title={'BACK'} textClassName='text-2xl'/>
 
       <div className='flex flex-col h-screen justify-center px-6 py-12 lg:px-8 lg:py-0 pt-26 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>

@@ -8,7 +8,7 @@ export default function ContactSection() {
         <div className='hero-content flex-col lg:flex-row-reverse lg:gap-20'>
           <div className='text-center lg:text-left'>
             <h1 className='text-3xl md:text-5xl lg:text-5xl font-black text-forest-green uppercase '>
-              Got Money Matters? <br /> Let's Talk!
+              Got Money Matters? <br /> Let&#39;s Talk!
             </h1>
             <div className='max-w-2xl lg:max-w-5xl'>
               <p className='py-6 text-base lg:text-xl text-forest-green'>

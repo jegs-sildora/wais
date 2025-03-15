@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+// eslint-disable-next-line react/prop-types
 export default function FormNav({ title, textClassName = "text-5xl" }) {
   return (
     <>

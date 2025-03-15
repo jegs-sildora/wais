@@ -1,18 +1,19 @@
 import { Link } from "react-router-dom";
-import { easeIn, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import money from "../assets/money.svg";
 import phone from "../assets/phone.png";
+import LandingPageNavBar from "./LandingPageNavBar";
 
 export default function HomeSection() {
   return (
+  <>
+    <LandingPageNavBar />
     <section
       id='home'
       className='flex justify-center items-center text-forest-green font-medium bg-[url("/src/assets/waves_bg.svg")] bg-cover bg-center py-8 md:py-0 lg:py-0 min-h-screen md:min-h-screen lg:min-h-screen'
     >
       <div
         className='hero intersect:motion-preset-fade intersect:motion-preset-blur-right intersect:motion-opacity-in-0 intersect:-motion-translate-x-in-[100px] intersect:motion-ease-spring-smooth intersect:motion-duration-[1s]'
-        initial='hidden'
-        animate='visible'
       >
         <div className='hero-content flex flex-col lg:flex-row items-center text-center lg:text-left gap-10 lg:gap-20 pt-10 lg:mt-0 md:-mt-20'>
           <div className='max-w-2xl p-6'>
@@ -44,7 +45,7 @@ export default function HomeSection() {
               </Link>
             </motion.div>
             <p className='italic text-sm mt-5'>
-              It's easy! No credit card required!
+              It&#39;s easy! No credit card required!
             </p>
           </div>
 
@@ -61,5 +62,6 @@ export default function HomeSection() {
         </div>
       </div>
     </section>
+  </>
   );
 }
