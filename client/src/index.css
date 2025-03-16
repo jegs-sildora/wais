@@ -4,16 +4,10 @@
 @import "tailwindcss-intersect";
 
 @layer utilities {
-  @media (min-width: 1024px) { 
+  @media (max-width: 2000px) { 
     :root {
       scrollbar-color: #9FE870 #163300;
       scrollbar-width: thin;
-    }
-  }
-
-  @media (max-width: 1023px) { 
-    ::-webkit-scrollbar {
-      display: none;
     }
   }
 }

@@ -1,20 +1,33 @@
 import { Link } from "react-router-dom";
+import { X } from "lucide-react";
 
-// eslint-disable-next-line react/prop-types
-export default function FormNav({ title, textClassName = "text-5xl" }) {
-  return (
-    <>
-      <nav className='fixed w-full z-20 top-0 start-0 bg-white shadow-sm'>
-        <div className='max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 md:mx-4'>
-          <Link
-            to='/'
-            className={`group self-center ${textClassName} font-secondary motion-blur-in motion-opacity-in hover:underline decoration-bright-green`}
-          >
-            {title}
-            <span className='group-hover:text-bright-green-hover'>.</span>
-          </Link>
-        </div>
-      </nav>
-    </>
-  );
+export default function FormNav() {
+	return (
+		<>
+			<nav>
+				<div className="fixed top-0 left-0 w-full z-50 navbar shadow-sm px-10 md:px-15 lg:px-20 bg-white">
+					<div className="navbar-start">
+						<Link
+							to="/"
+							className={`group text-4xl font-secondary text-forest-green motion-blur-in motion-opacity-in hover:underline decoration-bright-green`}
+						>
+							WAIS
+							<span className="text-forest-green group-hover:text-bright-green-hover">
+								.
+							</span>
+						</Link>
+					</div>
+					<div className="navbar-end">
+						<div className="hover:drop-shadow-sm motion-blur-in motion-opacity-in">
+							<Link
+								to="/"
+							>
+								<X size={38} strokeWidth={3} className="hover:bg-gray-200 hover:rounded-4xl p-1.5"/>
+							</Link>
+						</div>
+					</div>
+				</div>
+			</nav>
+		</>
+	);
 }
