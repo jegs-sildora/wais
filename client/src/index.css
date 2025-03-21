@@ -4,6 +4,10 @@
 @import "tailwindcss-intersect";
 
 @layer utilities {
+  .font-secondary {
+    font-family: "Parafina", sans-serif;
+  }
+
   @media (max-width: 2000px) { 
     :root {
       scrollbar-color: #9FE870 #163300;
@@ -12,6 +16,11 @@
   }
 }
 
+
+@font-face {
+  font-family: "Parafina";
+  src: url("/fonts/Parafina-Black-S.ttf") format("truetype");
+}
 
 @theme {
   --font-primary: "Inter", serif;

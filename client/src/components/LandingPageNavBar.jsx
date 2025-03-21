@@ -1,8 +1,14 @@
-import { Link as RouterLink } from "react-router-dom";
-import { Link as ScrollLink } from "react-scroll";
-import * as motion from "motion/react-client";
+import { Link as RouterLink } from 'react-router-dom';
+import { Link as ScrollLink } from 'react-scroll';
+import { useState } from 'react';
+import * as motion from 'motion/react-client';
 
 export default function LandingPageNavBar() {
+  const [active, setActive] = useState('home');
+
+  const handleSetActive = (to) => {
+    setActive(to);
+  };
 
   return (
     <>
@@ -31,34 +37,40 @@ export default function LandingPageNavBar() {
                 className='menu menu-lg dropdown-content rounded-box mt-3 w-36 p-2 shadow bg-white'
               >
                 <li
-                  className={`rounded-4xl hover:bg-bright-green`}
+                  className={`rounded-4xl hover:bg-bright-green ${active === 'home' ? 'bg-bright-green' : ''}`}
                 >
                   <ScrollLink
                     to='home'
                     smooth={true}
                     duration={800}
+                    onSetActive={() => handleSetActive('home')}
+                    onClick={() => handleSetActive('home')}
                   >
                     Home
                   </ScrollLink>
                 </li>
                 <li
-                  className={`rounded-4xl hover:bg-bright-green`}
+                  className={`rounded-4xl hover:bg-bright-green ${active === 'about' ? 'bg-bright-green' : ''}`}
                 >
                   <ScrollLink
                     to='about'
                     smooth={true}
                     duration={800}
+                    onSetActive={() => handleSetActive('about')}
+                    onClick={() => handleSetActive('about')}
                   >
                     About
                   </ScrollLink>
                 </li>
                 <li
-                  className={`rounded-4xl hover:bg-bright-green`}
+                  className={`rounded-4xl hover:bg-bright-green ${active === 'contact' ? 'bg-bright-green' : ''}`}
                 >
                   <ScrollLink
                     to='contact'
                     smooth={true}
                     duration={800}
+                    onSetActive={() => handleSetActive('contact')}
+                    onClick={() => handleSetActive('contact')}
                   >
                     Contact Us
                   </ScrollLink>
@@ -80,12 +92,14 @@ export default function LandingPageNavBar() {
               <motion.li
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.99 }}
-                className={`hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in`}
+                className={`hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in ${active === 'home' ? 'bg-bright-green' : ''}`}
               >
                 <ScrollLink
                   to='home'
                   smooth={true}
                   duration={1600}
+                  onSetActive={() => handleSetActive('home')}
+                  onClick={() => handleSetActive('home')}
                 >
                   Home
                 </ScrollLink>
@@ -93,13 +107,14 @@ export default function LandingPageNavBar() {
               <motion.li
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.99 }}
-                className={`hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in`}
+                className={`hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in ${active === 'about' ? 'bg-bright-green' : ''}`}
               >
                 <ScrollLink
                   to='about'
                   smooth={true}
                   duration={1600}
-
+                  onSetActive={() => handleSetActive('about')}
+                  onClick={() => handleSetActive('about')}
                 >
                   About
                 </ScrollLink>
@@ -107,12 +122,14 @@ export default function LandingPageNavBar() {
               <motion.li
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.99 }}
-                className={`hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in `}
+                className={`hover:bg-bright-green rounded-4xl hover:drop-shadow-sm motion-blur-in motion-opacity-in ${active === 'contact' ? 'bg-bright-green' : ''}`}
               >
                 <ScrollLink
                   to='contact'
                   smooth={true}
                   duration={1600}
+                  onSetActive={() => handleSetActive('contact')}
+                  onClick={() => handleSetActive('contact')}
                 >
                   Contact Us
                 </ScrollLink>
