@@ -4,64 +4,63 @@
 @import "tailwindcss-intersect";
 
 @layer utilities {
-  .font-secondary {
-    font-family: "Parafina", sans-serif;
-  }
+	.font-secondary {
+		font-family: "Parafina", sans-serif;
+	}
 
-  @media (max-width: 2000px) { 
-    :root {
-      scrollbar-color: #9FE870 #163300;
-      scrollbar-width: thin;
-    }
-  }
+	@media (max-width: 2000px) {
+		:root {
+			scrollbar-color: #9fe870 #163300;
+			scrollbar-width: thin;
+		}
+	}
 }
 
-
 @font-face {
-  font-family: "Parafina";
-  src: url("/fonts/Parafina-Black-S.ttf") format("truetype");
+	font-family: "Parafina";
+	src: url("/fonts/Parafina-Black-S.ttf") format("truetype");
 }
 
 @theme {
-  --font-primary: "Inter", serif;
-  --font-secondary: "Parafina Black S";
-  --color-bright-green: #9FE870;
-  --color-bright-green-hover: #80E142;
-  --color-forest-green: #163300;
-  --color-white-hover: #EDEFEB;
+	--font-primary: "Inter", serif;
+	--font-secondary: "Parafina Black S";
+	--color-bright-green: #9fe870;
+	--color-bright-green-hover: #80e142;
+	--color-forest-green: #163300;
+	--color-white-hover: #edefeb;
 }
 
 @plugin "daisyui/theme" {
-  name: "wais";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: oklch(98% 0.002 247.839);
-  --color-base-200: oklch(98% 0 0);
-  --color-base-300: oklch(98% 0.001 106.423);
-  --color-base-content: #163300;
-  --color-primary: #9FE870;
-  --color-primary-content: #163300;
-  --color-secondary: #9FE870;
-  --color-secondary-content: #163300;
-  --color-accent: #9FE870;
-  --color-accent-content: #163300;
-  --color-neutral: #9FE870;
-  --color-neutral-content: #163300;
-  --color-info: oklch(71% 0.143 215.221);
-  --color-info-content: oklch(98% 0.019 200.873);
-  --color-success: #9FE870;
-  --color-success-content: #163300;
-  --color-warning: oklch(70% 0.213 47.604);
-  --color-warning-content: oklch(98% 0.016 73.684);
-  --color-error: oklch(57% 0.245 27.325);
-  --color-error-content: oklch(98% 0.002 247.839);
-  --radius-selector: 2rem;
-  --radius-field: 2rem;
-  --radius-box: 2rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
+	name: "wais";
+	default: true;
+	prefersdark: false;
+	color-scheme: "light";
+	--color-base-100: oklch(98% 0.002 247.839);
+	--color-base-200: oklch(98% 0 0);
+	--color-base-300: oklch(98% 0.001 106.423);
+	--color-base-content: #163300;
+	--color-primary: #9fe870;
+	--color-primary-content: #163300;
+	--color-secondary: #9fe870;
+	--color-secondary-content: #163300;
+	--color-accent: #9fe870;
+	--color-accent-content: #163300;
+	--color-neutral: #9fe870;
+	--color-neutral-content: #163300;
+	--color-info: oklch(71% 0.143 215.221);
+	--color-info-content: oklch(98% 0.019 200.873);
+	--color-success: #9fe870;
+	--color-success-content: #163300;
+	--color-warning: oklch(70% 0.213 47.604);
+	--color-warning-content: oklch(98% 0.016 73.684);
+	--color-error: oklch(57% 0.245 27.325);
+	--color-error-content: oklch(98% 0.002 247.839);
+	--radius-selector: 1rem;
+	--radius-field: 1rem;
+	--radius-box: 1rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 1;
+	--noise: 1;
 }
