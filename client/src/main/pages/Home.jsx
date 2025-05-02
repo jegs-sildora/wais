@@ -283,8 +283,8 @@ export default function Home() {
 							<h3 className="text-lg font-bold text-forest-green">
 								Current Balance
 							</h3>
-							<p className="text-2xl font-bold text-forest-green mt-2">
-								₱{financialSummary.currentBalance.toFixed(2)}
+							<p className="text-2xl font-black text-forest-green mt-2">
+								₱ {financialSummary.currentBalance.toFixed(2)}
 							</p>
 							<p className="text-sm text-gray-500 mt-1">
 								Your current financial balance
@@ -296,8 +296,8 @@ export default function Home() {
 							<h3 className="text-lg font-bold text-forest-green">
 								Total Income
 							</h3>
-							<p className="text-2xl font-bold text-forest-green mt-2">
-								₱{financialSummary.totalIncome.toFixed(2)}
+							<p className="text-2xl font-black text-forest-green mt-2">
+								₱ {financialSummary.totalIncome.toFixed(2)}
 							</p>
 							<p className="text-sm text-gray-500 mt-1">
 								Total money coming in
@@ -309,8 +309,8 @@ export default function Home() {
 							<h3 className="text-lg font-bold text-forest-green">
 								Total Expenses
 							</h3>
-							<p className="text-2xl font-bold text-red-500 mt-2">
-								₱{financialSummary.totalExpenses.toFixed(2)}
+							<p className="text-2xl font-black text-red-500 mt-2">
+								₱ {financialSummary.totalExpenses.toFixed(2)}
 							</p>
 							<p className="text-sm text-gray-500 mt-1">
 								Total money going out

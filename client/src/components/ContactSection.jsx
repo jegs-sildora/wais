@@ -65,7 +65,7 @@ export default function ContactSection() {
                   rows={4}
                 />
 
-                <button className='btn btn-primary w-full mt-4 font-extrabold'>
+                <button className='btn bg-bright-green w-full mt-4 font-extrabold'>
                   SEND MESSAGE
                 </button>
               </fieldset>

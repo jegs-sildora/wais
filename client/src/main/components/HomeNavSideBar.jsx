@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function HomeNavSideBar() {
-	const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false); // State for logout modal
-	const navigate = useNavigate(); // For navigation
+	const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const navigate = useNavigate();
 
 	const handleLogout = async () => {
 		try {
@@ -13,13 +14,13 @@ export default function HomeNavSideBar() {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				credentials: "include", // Include cookies for session management
+				credentials: "include",
 			});
 
 			if (response.ok) {
 				toast.success("Logged out successfully!");
-				setIsLogoutModalOpen(false); // Close the modal
-				navigate("/"); // Redirect to the home page
+				setIsLogoutModalOpen(false);
+				navigate("/");
 			} else {
 				toast.error("Failed to log out. Please try again.");
 			}
@@ -56,28 +57,30 @@ export default function HomeNavSideBar() {
 						</div>
 						<ul
 							tabIndex={0}
-							className="menu menu-lg dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+							className="menu menu-lg dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
 						>
 							<li>
-								<a>Dashboard</a>
+								<Link to={"/home"} >Dashboard </Link>
 							</li>
 							<li>
-								<a>Budget</a>
+								<Link to={"/budget"} >Budget </Link>
 							</li>
 						</ul>
 					</div>
 				</div>
+
 				<div className="flex">
 					<a className="btn btn-ghost text-4xl text-forest-green font-secondary">
 						WAIS
 					</a>
 				</div>
+
 				<div className="navbar-end mr-5">
-					<div className="dropdown dropdown-end">
+					<div className="dropdown dropdown-end relative">
 						<div
-							tabIndex={0}
 							role="button"
 							className="btn btn-ghost btn-circle avatar"
+							onClick={() => setIsDropdownOpen((prev) => !prev)}
 						>
 							<div className="w-10 rounded-full">
 								<img
@@ -87,8 +90,9 @@ export default function HomeNavSideBar() {
 							</div>
 						</div>
 						<ul
-							tabIndex={0}
-							className="menu menu-lg dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+							className={`absolute right-0 mt-3 w-52 p-2 shadow menu menu-lg bg-base-100 rounded-box z-10 ${
+								isDropdownOpen ? "block" : "hidden"
+							}`}
 						>
 							<li>
 								<a>Profile</a>
@@ -99,7 +103,10 @@ export default function HomeNavSideBar() {
 							<li>
 								<a
 									role="button"
-									onClick={() => setIsLogoutModalOpen(true)} // Open the logout modal
+									onClick={() => {
+										setIsDropdownOpen(false); 
+										setTimeout(() => setIsLogoutModalOpen(true)); 
+									}}
 								>
 									Log out
 								</a>
@@ -123,14 +130,14 @@ export default function HomeNavSideBar() {
 							<button
 								type="button"
 								className="px-4 py-2 font-bold text-forest-green bg-gray-200 rounded hover:bg-gray-300"
-								onClick={() => setIsLogoutModalOpen(false)} // Close the modal
+								onClick={() => setIsLogoutModalOpen(false)}
 							>
 								Cancel
 							</button>
 							<button
 								type="button"
 								className="px-4 py-2 font-bold text-forest-green bg-bright-green rounded hover:bg-bright-green-hover"
-								onClick={handleLogout} // Call logout function
+								onClick={handleLogout}
 							>
 								Log out
 							</button>

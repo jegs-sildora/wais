@@ -1,7 +1,7 @@
 export default function LandingPageFooter() {
   return (
     <>
-      <footer className='footer bg-primary text-primary-content items-center p-4 flex justify-between drop-shadow-2xl'>
+      <footer className='footer bg-bright-green text-primary-content items-center p-4 flex justify-between drop-shadow-2xl'>
         <aside className='grid-flow-col items-center'>
           <p className='text-xs font-bold lg:text-base'>
             Copyright © {new Date().getFullYear()} - All rights reserved
