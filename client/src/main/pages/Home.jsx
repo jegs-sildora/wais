@@ -4,11 +4,11 @@ import { toast } from "sonner";
 
 export default function Home() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete modal
-	const [deleteTransactionId, setDeleteTransactionId] = useState(null); // State for transaction ID to delete
-	const [transactions, setTransactions] = useState([]); // State to store transactions
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [deleteTransactionId, setDeleteTransactionId] = useState(null);
+	const [transactions, setTransactions] = useState([]);
 	const [transaction, setTransaction] = useState({
-		type: "expense",
+		type: "Expense",
 		amount: "",
 		category: "",
 		description: "",
@@ -81,26 +81,18 @@ export default function Home() {
 	// Fetch financial summary from the database
 	const fetchFinancialSummary = async () => {
 		try {
-			if (!currentUser || !currentUser.id) {
-				console.error("Current user is not set or invalid.");
-				return;
-			}
-
-			const response = await fetch(
-				`http://localhost:3000/financial-summary/${currentUser.id}`,
-				{
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					credentials: "include", // Include cookies for session management
-				},
-			);
-
+			const response = await fetch("http://localhost:3000/financial-summary", {
+				method: "GET",
+				credentials: "include",
+			});
 			const data = await response.json();
 
 			if (response.ok) {
-				setFinancialSummary(data); // Set the financial summary data
+				setFinancialSummary({
+					currentBalance: parseFloat(data.currentBalance) || 0,
+					totalIncome: parseFloat(data.totalIncome) || 0,
+					totalExpenses: parseFloat(data.totalExpenses) || 0,
+				});
 			} else {
 				toast.error(data.error || "Failed to fetch financial summary.");
 			}
@@ -109,6 +101,11 @@ export default function Home() {
 			toast.error("An error occurred while fetching financial summary.");
 		}
 	};
+
+	// Expose fetchFinancialSummary to the global window object
+	useEffect(() => {
+		window.fetchFinancialSummary = fetchFinancialSummary;
+	}, []);
 
 	// Fetch financial summary when the user is loaded
 	useEffect(() => {
@@ -121,6 +118,33 @@ export default function Home() {
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
 		setTransaction((prev) => ({ ...prev, [name]: value }));
+	};
+
+	// Function to update the budget for a specific category
+	const updateBudget = async (category, amount, type) => {
+		try {
+			// Ensure the adjustment is a valid number
+			const adjustment =
+				type === "Income" ? parseFloat(amount) : -parseFloat(amount);
+
+			// Send a request to the backend to update the budget
+			const response = await fetch(`http://localhost:3000/budgets/update`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include", // Include cookies for session management
+				body: JSON.stringify({ category, adjustment }), // Ensure correct data format
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				toast.error(errorData.error || "Failed to update budget.");
+			}
+		} catch (err) {
+			console.error("Error updating budget:", err);
+			toast.error("An error occurred while updating the budget.");
+		}
 	};
 
 	// Handle form submission (Add or Edit)
@@ -157,7 +181,7 @@ export default function Home() {
 						headers: {
 							"Content-Type": "application/json",
 						},
-						body: JSON.stringify(transaction), // No user_id included
+						body: JSON.stringify(transaction),
 					},
 				);
 			} else {
@@ -167,7 +191,7 @@ export default function Home() {
 					headers: {
 						"Content-Type": "application/json",
 					},
-					credentials: "include", // Include cookies for session management
+					credentials: "include",
 					body: JSON.stringify(transaction),
 				});
 			}
@@ -180,6 +204,7 @@ export default function Home() {
 						? "Transaction updated successfully!"
 						: "Transaction added successfully!",
 				);
+
 				setIsModalOpen(false);
 				setTransaction({
 					type: "Expense",
@@ -188,14 +213,16 @@ export default function Home() {
 					description: "",
 					date: new Date().toISOString().split("T")[0],
 				});
-				setEditingTransactionId(null); // Reset editing state
+				setEditingTransactionId(null);
+
 				// Refresh transactions
 				const updatedTransactions = await fetch(
 					`http://localhost:3000/transactions/${currentUser.id}`,
 				);
 				setTransactions(await updatedTransactions.json());
+
 				// Refresh financial summary
-				fetchFinancialSummary();
+				await fetchFinancialSummary(); // Ensure this is awaited
 			} else {
 				toast.error(
 					data.error || "Failed to save transaction. Please try again.",
@@ -280,21 +307,21 @@ export default function Home() {
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 w-10/12">
 						{/* Current Balance Card */}
 						<div className="bg-white shadow-lg rounded-lg p-6 text-center">
-							<h3 className="text-lg font-bold text-forest-green">
-								Current Balance
-							</h3>
-							<p className="text-2xl font-black text-forest-green mt-2">
-								₱ {financialSummary.currentBalance.toFixed(2)}
-							</p>
-							<p className="text-sm text-gray-500 mt-1">
-								Your current financial balance
-							</p>
+								<h3 className="text-lg font-bold text-forest-green">Current Balance</h3>
+								<p
+										className={`text-2xl font-black mt-2 ${
+												financialSummary.currentBalance < 0 ? "text-red-500" : "text-forest-green"
+										}`}
+								>
+										₱ {financialSummary.currentBalance.toFixed(2)}
+								</p>
+								<p className="text-sm text-gray-500 mt-1">Your current financial balance</p>
 						</div>
 
 						{/* Total Income Card */}
 						<div className="bg-white shadow-lg rounded-lg p-6 text-center">
 							<h3 className="text-lg font-bold text-forest-green">
-								Total Income
+								Total Inflows
 							</h3>
 							<p className="text-2xl font-black text-forest-green mt-2">
 								₱ {financialSummary.totalIncome.toFixed(2)}
@@ -307,7 +334,7 @@ export default function Home() {
 						{/* Total Expenses Card */}
 						<div className="bg-white shadow-lg rounded-lg p-6 text-center">
 							<h3 className="text-lg font-bold text-forest-green">
-								Total Expenses
+								Total Outflows
 							</h3>
 							<p className="text-2xl font-black text-red-500 mt-2">
 								₱ {financialSummary.totalExpenses.toFixed(2)}
@@ -317,24 +344,6 @@ export default function Home() {
 							</p>
 						</div>
 					</div>
-				</div>
-				<div className="flex justify-end mr-8">
-					<button
-						className="px-4 py-2 font-bold text-forest-green bg-bright-green rounded hover:bg-bright-green-hover"
-						onClick={() => {
-							setTransaction({
-								type: "Expense",
-								amount: "",
-								category: "",
-								description: "",
-								date: new Date().toISOString().split("T")[0],
-							});
-							setEditingTransactionId(null);
-							setIsModalOpen(true);
-						}}
-					>
-						Add Transaction
-					</button>
 				</div>
 
 				{/* Modal */}
@@ -365,8 +374,8 @@ export default function Home() {
 											onChange={handleInputChange}
 											className="w-full p-2 border rounded appearance-none"
 										>
-											<option value="Expense">Expense</option>
-											<option value="Income">Income</option>
+											<option value="Expense">Money Out</option>
+											<option value="Income">Money In</option>
 										</select>
 									</div>
 									<div>
@@ -485,54 +494,80 @@ export default function Home() {
 				)}
 			</div>
 
+			{/* Add Transaction Button */}
+			<div className="fixed bottom-8 right-8">
+				<button
+					className="btn btn-primary px-4 py-2 font-extrabold text-forest-green bg-bright-green hover:bg-bright-green-hover shadow-lg rounded-full"
+					onClick={() => {
+						setTransaction({
+							type: "Expense",
+							amount: "",
+							category: "",
+							description: "",
+							date: new Date().toISOString().split("T")[0],
+						});
+						setEditingTransactionId(null);
+						setIsModalOpen(true);
+					}}
+				>
+					Add Transaction
+				</button>
+			</div>
+
 			{/* Transactions Table */}
 			<div className="overflow-x-auto pl-10 pr-10">
-				<table className="table table-zebra w-full">
-					<thead>
-						<tr>
-							<th className="text-center">#</th>
-							<th className="text-center">Type</th>
-							<th className="text-center">Amount</th>
-							<th className="text-center">Category</th>
-							<th className="text-center">Description</th>
-							<th className="text-center">Date</th>
-							<th className="text-center">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{transactions.map((transaction, index) => (
-							<tr key={transaction.id}>
-								<th className="text-center">{index + 1}</th>
-								<td className="text-center">{transaction.type}</td>
-								<td className="text-center">{transaction.amount}</td>
-								<td className="text-center">{transaction.category}</td>
-								<td className="text-center">{transaction.description}</td>
-								<td className="text-center">
-									{/* Format the date to MM-DD-YYYY */}
-									{new Date(transaction.date).toLocaleDateString("en-US", {
-										month: "2-digit",
-										day: "2-digit",
-										year: "numeric",
-									})}
-								</td>
-								<td className="text-center">
-									<button
-										className="px-2 py-1 bg-gray-200 text-forest-green font-semibold rounded hover:bg-gray-300"
-										onClick={() => handleEdit(transaction)}
-									>
-										Edit
-									</button>
-									<button
-										className="px-2 py-1 text-forest-green font-semibold bg-bright-green rounded hover:bg-bright-green-hover ml-2"
-										onClick={() => confirmDelete(transaction.id)}
-									>
-										Delete
-									</button>
-								</td>
+				{transactions.length > 0 ? (
+					<table className="table table-zebra w-full">
+						<thead>
+							<tr>
+								<th className="text-center">#</th>
+								<th className="text-center">Type</th>
+								<th className="text-center">Amount</th>
+								<th className="text-center">Category</th>
+								<th className="text-center">Description</th>
+								<th className="text-center">Date</th>
+								<th className="text-center">Actions</th>
 							</tr>
-						))}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{transactions.map((transaction, index) => (
+								<tr key={transaction.id}>
+									<th className="text-center">{index + 1}</th>
+									<td className="text-center">{transaction.type}</td>
+									<td className="text-center">{transaction.amount}</td>
+									<td className="text-center">{transaction.category}</td>
+									<td className="text-center">{transaction.description}</td>
+									<td className="text-center">
+										{/* Format the date to MM-DD-YYYY */}
+										{new Date(transaction.date).toLocaleDateString("en-US", {
+											month: "2-digit",
+											day: "2-digit",
+											year: "numeric",
+										})}
+									</td>
+									<td className="text-center">
+										<button
+											className="btn btn-sm btn-primary"
+											onClick={() => handleEdit(transaction)}
+										>
+											Edit
+										</button>
+										<button
+											className="btn btn-sm btn-error ml-2"
+											onClick={() => confirmDelete(transaction.id)}
+										>
+											Delete
+										</button>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				) : (
+					<div className="text-center text-gray-500 mt-6">
+						<p></p>
+					</div>
+				)}
 			</div>
 		</>
 	);

@@ -18,6 +18,7 @@ import LandingPage from "./LandingPage.jsx";
 //MAIN PAGE
 import Home from "./main/pages/Home.jsx";
 import ObserverProvider from "./components/ObserverProvider.jsx";
+import Budget from "./main/pages/Budget.jsx";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
     path: "/changepassword",
     element: <ChangePassword />,
   },
+  {
+    path: "/budget",
+    element: <Budget />
+  }
 ]);
 
 function App() {

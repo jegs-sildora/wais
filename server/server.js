@@ -1,47 +1,44 @@
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
-const pgSession = require("connect-pg-simple")(session); // Use PostgreSQL for session storage
-const pool = require("./db"); // Assuming you have a PostgreSQL pool setup
+const pgSession = require("connect-pg-simple")(session);
+const pool = require("./db");
 const bcrypt = require("bcrypt");
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 
-// Configure CORS
+// CORS configuration
 app.use(
 	cors({
-		origin: "http://localhost:5173", // Replace with your frontend's URL
-		credentials: true, // Allow cookies and credentials
+		origin: "http://localhost:5173",
+		credentials: true,
 	}),
 );
 
-// Configure session
+// Session configuration
 app.use(
 	session({
 		store: new pgSession({
-			pool: pool, // Use your existing PostgreSQL pool
-			tableName: "session", // Table name for storing sessions
+			pool: pool,
+			tableName: "session",
 		}),
-		secret: "your-secret-key", // Replace with a strong secret key
+		secret: "your-secret-key",
 		resave: false,
 		saveUninitialized: false,
 		cookie: {
-			secure: false, // Set to true if using HTTPS
+			secure: false,
 			httpOnly: true,
 			maxAge: 1000 * 60 * 60 * 24, // 1 day
 		},
 	}),
 );
 
-//SIGNING UP
+// SIGNUP
 app.post("/signup", async (req, res) => {
 	const { username, email, password } = req.body;
 
 	try {
-		// Check if the email or username already exists
 		const emailCheck = await pool.query(
 			"SELECT * FROM users WHERE email = $1",
 			[email],
@@ -58,23 +55,17 @@ app.post("/signup", async (req, res) => {
 			return res.status(400).json({ error: "Username is already taken." });
 		}
 
-		// Hash the password
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
 
-		// Insert the new user into the database
 		const result = await pool.query(
 			"INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING user_id, username, email",
 			[username, email, hashedPassword],
 		);
 
 		const newUser = result.rows[0];
-
-		// Store user_id in the session
 		req.session.user_id = newUser.user_id;
-		console.log("Session updated with user_id:", req.session.user_id);
 
-		// Respond with the new user details
 		res.status(201).json({
 			message: "User created successfully!",
 			user: {
@@ -89,14 +80,11 @@ app.post("/signup", async (req, res) => {
 	}
 });
 
-//LOGIN VERIFICATION
+// LOGIN
 app.post("/login", async (req, res) => {
 	const { usernameOrEmail, password } = req.body;
 
 	try {
-		console.log("Login request received:", req.body);
-
-		// Query the database for the user
 		const result = await pool.query(
 			"SELECT * FROM users WHERE email = $1 OR username = $1",
 			[usernameOrEmail],
@@ -107,17 +95,13 @@ app.post("/login", async (req, res) => {
 		}
 
 		const user = result.rows[0];
-
-		// Compare the provided password with the hashed password
 		const validPassword = await bcrypt.compare(password, user.password);
 
 		if (!validPassword) {
 			return res.status(401).json({ error: "Invalid credentials" });
 		}
 
-		// Store user_id in the session
-		req.session.user_id = user.user_id; // Correctly store user_id in the session
-		console.log("Session updated with user_id:", req.session.user_id);
+		req.session.user_id = user.user_id;
 
 		res.json({
 			message: "Login successful",
@@ -129,10 +113,27 @@ app.post("/login", async (req, res) => {
 	}
 });
 
-//CURRENT USER
+// LOGOUT
+app.post("/logout", (req, res) => {
+	try {
+		req.session.destroy((err) => {
+			if (err) {
+				console.error("Error destroying session:", err);
+				return res.status(500).json({ error: "Failed to log out." });
+			}
+			res.clearCookie("connect.sid");
+			res.status(200).json({ message: "Logged out successfully." });
+		});
+	} catch (err) {
+		console.error("Error during logout:", err.message);
+		res.status(500).json({ error: "Internal server error." });
+	}
+});
+
+// CURRENT USER
 app.get("/currentuser", async (req, res) => {
 	try {
-		const user_id = req.session.user_id; // Retrieve user_id from session
+		const user_id = req.session.user_id;
 		if (!user_id) {
 			return res.status(401).json({ error: "User not logged in" });
 		}
@@ -146,88 +147,236 @@ app.get("/currentuser", async (req, res) => {
 			return res.status(404).json({ error: "User not found" });
 		}
 
-		res.json(result.rows[0]); // Return the user details
+		res.json(result.rows[0]);
 	} catch (err) {
 		console.error("Error fetching current user:", err.message);
 		res.status(500).json({ error: "Internal server error" });
 	}
 });
 
-//FORGOT PASSWORD
-app.post("/forgotpassword", async (req, res) => {
-	const { email } = req.body;
+// BUDGET: Create
+app.post("/budgets", async (req, res) => {
+	const user_id = req.session.user_id;
+	if (!user_id) return res.status(401).json({ error: "User not logged in" });
+
+	const { category, allocated_amount, start_date, end_date, type } = req.body;
+
+	// Validate required fields
+	if (!category || !allocated_amount || !start_date || !end_date || !type) {
+		return res.status(400).json({ error: "Missing required fields" });
+	}
+
+	// Validate type field
+	if (type !== "Expense" && type !== "Savings") {
+		return res
+			.status(400)
+			.json({ error: "Invalid type. Must be 'Expense' or 'Savings'." });
+	}
 
 	try {
-		const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-			email,
-		]);
+		const result = await pool.query(
+			`INSERT INTO budgets (user_id, category, allocated_amount, spent_amount, saved_amount, start_date, end_date, type)
+             VALUES ($1, $2, $3, 0, 0, $4, $5, $6) RETURNING *`,
+			[user_id, category, allocated_amount, start_date, end_date, type],
+		);
 
-		if (result.rows.length === 0) {
-			return res.status(404).json({ error: "User not found" });
-		}
-
-		const user = result.rows[0];
-
-		res.json({
-			message: "Email found!",
-			user: { email: user.email },
+		res.status(201).json({
+			message: "Budget added successfully!",
+			budget: result.rows[0],
 		});
 	} catch (err) {
-		res.status(500).json({ err: "Internal server error" });
+		console.error("Error adding budget:", err.message);
+		res.status(500).json({ error: "Internal server error" });
 	}
 });
 
-//CHANGING PASSWORD
-app.post("/changepassword", async (req, res) => {
-	const { email, password } = req.body;
+// BUDGET: Read
+app.get("/budgets", async (req, res) => {
+	const user_id = req.session.user_id;
+	if (!user_id) return res.status(401).json({ error: "User not logged in" });
 
 	try {
-		const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-			email,
-		]);
+		const result = await pool.query(
+			`SELECT id, category, 
+                    CAST(allocated_amount AS NUMERIC) AS allocated_amount, 
+                    CAST(spent_amount AS NUMERIC) AS spent_amount, 
+                    CAST(saved_amount AS NUMERIC) AS saved_amount,
+                    (allocated_amount - spent_amount - saved_amount) AS remaining_budget,
+                    start_date, end_date, type
+             FROM budgets
+             WHERE user_id = $1
+             ORDER BY start_date DESC`,
+			[user_id],
+		);
+		res.json(result.rows);
+	} catch (err) {
+		console.error("Error fetching budgets:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// BUDGET: Update
+app.put("/budgets/:id", async (req, res) => {
+	const user_id = req.session.user_id;
+	const { id } = req.params;
+	const { allocated_amount, start_date, end_date } = req.body;
+
+	if (!user_id) return res.status(401).json({ error: "User not logged in" });
+
+	try {
+		const result = await pool.query(
+			`UPDATE budgets
+             SET allocated_amount = $1, start_date = $2, end_date = $3
+             WHERE id = $4 AND user_id = $5 RETURNING *`,
+			[allocated_amount, start_date, end_date, id, user_id],
+		);
 
 		if (result.rows.length === 0) {
-			return res.status(404).json({ error: "User not found" });
+			return res
+				.status(404)
+				.json({ error: "Budget not found or not authorized" });
 		}
 
-		const salt = await bcrypt.genSalt(10);
-		const hashedPassword = await bcrypt.hash(password, salt);
-
-		await pool.query("UPDATE users SET password = $1 WHERE email = $2", [
-			hashedPassword,
-			email,
-		]);
-
-		res.json({ message: "Password updated successfully!" });
+		res.json(result.rows[0]);
 	} catch (err) {
-		res.status(500).json({ err: "Internal server error" });
+		console.error("Error updating budget:", err.message);
+		res.status(500).json({ error: "Internal server error" });
 	}
 });
 
-//TRANSACTION: Add a new transaction (Create)
-app.post("/transactions", async (req, res) => {
+app.put("/budgets/update", async (req, res) => {
+	const user_id = req.session.user_id;
+	const { category, adjustment } = req.body;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not logged in" });
+	}
+
+	// Validate adjustment
+	if (isNaN(parseFloat(adjustment))) {
+		return res
+			.status(400)
+			.json({ error: "Invalid adjustment value. Must be a number." });
+	}
+
 	try {
-		const user_id = req.session.user_id; // Retrieve user_id from session
-		if (!user_id) {
-			return res.status(401).json({ error: "User not logged in" });
+		const result = await pool.query(
+			`UPDATE budgets
+             SET spent_amount = spent_amount + $1
+             WHERE user_id = $2 AND category = $3
+             RETURNING *`,
+			[adjustment, user_id, category],
+		);
+
+		if (result.rows.length === 0) {
+			return res.status(404).json({ error: "Budget category not found." });
 		}
 
-		const { type, amount, category, description, date } = req.body;
+		res.json({
+			message: "Budget updated successfully!",
+			budget: result.rows[0],
+		});
+	} catch (err) {
+		console.error("Error updating budget:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
 
-		// Insert the transaction into the database
+// BUDGET: Delete
+app.delete("/budgets/:id", async (req, res) => {
+	const user_id = req.session.user_id;
+	const { id } = req.params;
+
+	if (!user_id) return res.status(401).json({ error: "User not logged in" });
+
+	try {
 		const result = await pool.query(
-			"INSERT INTO transactions (user_id, type, amount, category, description, date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+			`DELETE FROM budgets WHERE id = $1 AND user_id = $2 RETURNING *`,
+			[id, user_id],
+		);
+
+		if (result.rows.length === 0) {
+			return res
+				.status(404)
+				.json({ error: "Budget not found or not authorized" });
+		}
+
+		res.json({
+			message: "Budget deleted successfully",
+			budget: result.rows[0],
+		});
+	} catch (err) {
+		console.error("Error deleting budget:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// TRANSACTION: Create
+app.post("/transactions", async (req, res) => {
+	const { type, amount, category, description, date } = req.body;
+	const user_id = req.session.user_id;
+
+	if (!user_id) return res.status(401).json({ error: "User not logged in" });
+
+	// Validate amount
+	if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+		return res
+			.status(400)
+			.json({ error: "Invalid amount. Must be a positive number." });
+	}
+
+	try {
+		// Insert the transaction
+		const transactionResult = await pool.query(
+			`INSERT INTO transactions (user_id, type, amount, category, description, date)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
 			[user_id, type, amount, category, description, date],
 		);
 
-		res.json(result.rows[0]);
+		// Update the corresponding budget's saved_amount or spent_amount
+		if (type === "Expense") {
+			// Update spent_amount for Expense transactions
+			const result = await pool.query(
+				`UPDATE budgets
+                 SET spent_amount = spent_amount + $1
+                 WHERE user_id = $2 AND category = $3
+                 RETURNING *`,
+				[amount, user_id, category],
+			);
+
+			if (result.rows.length === 0) {
+				return res
+					.status(404)
+					.json({ error: "Budget category not found for Expense." });
+			}
+		} else if (type === "Income") {
+			// Update saved_amount for Income transactions
+			const result = await pool.query(
+				`UPDATE budgets
+                 SET saved_amount = saved_amount + $1
+                 WHERE user_id = $2 AND category = $3
+                 RETURNING *`,
+				[amount, user_id, category],
+			);
+
+			if (result.rows.length === 0) {
+				return res
+					.status(404)
+					.json({ error: "Budget category not found for Income." });
+			}
+		}
+
+		res.status(201).json({
+			message: "Transaction added successfully!",
+			transaction: transactionResult.rows[0],
+		});
 	} catch (err) {
 		console.error("Error adding transaction:", err.message);
 		res.status(500).json({ error: "Internal server error" });
 	}
 });
 
-//TRANSACTION: Get all transactions for a user (Read)
+// TRANSACTION: Get all
 app.get("/transactions/:user_id", async (req, res) => {
 	const { user_id } = req.params;
 	try {
@@ -242,7 +391,7 @@ app.get("/transactions/:user_id", async (req, res) => {
 	}
 });
 
-//TRANSACTION: Get a single transaction by ID (Read)
+// TRANSACTION: Get one
 app.get("/transactions/:user_id/:id", async (req, res) => {
 	const { user_id, id } = req.params;
 	try {
@@ -262,7 +411,7 @@ app.get("/transactions/:user_id/:id", async (req, res) => {
 	}
 });
 
-//TRANSACTION: Update a transaction (Update)
+// TRANSACTION: Update
 app.put("/transactions/:id", async (req, res) => {
 	const { id } = req.params;
 	const { type, amount, category, description, date, user_id } = req.body;
@@ -289,7 +438,7 @@ app.put("/transactions/:id", async (req, res) => {
 	}
 });
 
-//TRANSACTION: Delete a transaction (Delete)
+// TRANSACTION: Delete
 app.delete("/transactions/:id", async (req, res) => {
 	const { id } = req.params;
 	const { user_id } = req.body;
@@ -316,38 +465,29 @@ app.delete("/transactions/:id", async (req, res) => {
 	}
 });
 
-//FINANCIAL SUMMARY: Get financial summary for a user
-app.get("/financial-summary/:userId", async (req, res) => {
-	const { userId } = req.params;
+// FINANCIAL SUMMARY
+app.get("/financial-summary", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) return res.status(401).json({ error: "User not logged in" });
 
 	try {
-		// Validate userId
-		if (!userId) {
-			return res.status(400).json({ error: "User ID is required." });
-		}
-
-		// Calculate total income
-		const incomeResult = await pool.query(
-			"SELECT COALESCE(SUM(amount), 0) AS total_income FROM transactions WHERE user_id = $1 AND type = 'Income'",
-			[userId],
+		// Fetch total income, expenses, and calculate current balance from transactions only
+		const financialSummary = await pool.query(
+			`SELECT 
+                COALESCE(SUM(CASE WHEN t.type = 'Income' THEN t.amount ELSE 0 END), 0) AS total_income,
+                COALESCE(SUM(CASE WHEN t.type = 'Expense' THEN t.amount ELSE 0 END), 0) AS total_expenses,
+                COALESCE(SUM(CASE WHEN t.type = 'Income' THEN t.amount ELSE 0 END), 0) -
+                COALESCE(SUM(CASE WHEN t.type = 'Expense' THEN t.amount ELSE 0 END), 0) AS current_balance
+            FROM transactions t
+            WHERE t.user_id = $1`,
+			[user_id],
 		);
 
-		// Calculate total expenses
-		const expensesResult = await pool.query(
-			"SELECT COALESCE(SUM(amount), 0) AS total_expenses FROM transactions WHERE user_id = $1 AND type = 'Expense'",
-			[userId],
-		);
-
-		const totalIncome = parseFloat(incomeResult.rows[0].total_income);
-		const totalExpenses = parseFloat(expensesResult.rows[0].total_expenses);
-
-		// Calculate current balance
-		const currentBalance = totalIncome - totalExpenses;
-
-		res.json({
-			currentBalance,
-			totalIncome,
-			totalExpenses,
+		res.status(200).json({
+			totalIncome: parseFloat(financialSummary.rows[0].total_income) || 0,
+			totalExpenses: parseFloat(financialSummary.rows[0].total_expenses) || 0,
+			currentBalance: parseFloat(financialSummary.rows[0].current_balance) || 0,
 		});
 	} catch (err) {
 		console.error("Error fetching financial summary:", err.message);
@@ -355,24 +495,7 @@ app.get("/financial-summary/:userId", async (req, res) => {
 	}
 });
 
-//LOGOUT
-app.post("/logout", (req, res) => {
-    try {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error("Error destroying session:", err);
-                return res.status(500).json({ error: "Failed to log out." });
-            }
-            res.clearCookie("connect.sid"); // Clear the session cookie
-            res.status(200).json({ message: "Logged out successfully." });
-        });
-    } catch (err) {
-        console.error("Error during logout:", err.message);
-        res.status(500).json({ error: "Internal server error." });
-    }
-});
-
-// Start the server
+// Start server
 app.listen(3000, () => {
 	console.log("Server is running on http://localhost:3000");
 });
