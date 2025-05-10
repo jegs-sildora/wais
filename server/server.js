@@ -160,23 +160,29 @@ app.post("/transactions", async (req, res) => {
 	const user_id = req.session.user_id;
 
 	if (!user_id) {
-			return res.status(401).json({ error: "User not authenticated" });
+		return res.status(401).json({ error: "User not authenticated" });
 	}
 
 	try {
-			console.log("Saving transaction for user:", user_id);
-			console.log("Transaction details:", { type, amount, category, description, date });
+		console.log("Saving transaction for user:", user_id);
+		console.log("Transaction details:", {
+			type,
+			amount,
+			category,
+			description,
+			date,
+		});
 
-			await pool.query(
-					`INSERT INTO transactions (user_id, type, amount, category, description, date)
+		await pool.query(
+			`INSERT INTO transactions (user_id, type, amount, category, description, date)
 					 VALUES ($1, $2, $3, $4, $5, $6)`,
-					[user_id, type, amount, category, description, date],
-			);
+			[user_id, type, amount, category, description, date],
+		);
 
-			res.status(201).json({ message: "Transaction saved successfully!" });
+		res.status(201).json({ message: "Transaction saved successfully!" });
 	} catch (err) {
-			console.error("Error saving transaction:", err.message);
-			res.status(500).json({ error: "Failed to save transaction" });
+		console.error("Error saving transaction:", err.message);
+		res.status(500).json({ error: "Failed to save transaction" });
 	}
 });
 
@@ -279,43 +285,100 @@ app.delete("/transactions/:transactionId", async (req, res) => {
 app.get("/transactions/summary", async (req, res) => {
 	const userId = req.session.user_id; // Ensure user authentication
 	if (!userId) {
-			return res.status(401).json({ error: "User not authenticated" });
+		return res.status(401).json({ error: "User not authenticated" });
 	}
 
 	try {
-			// Query for total income
-			const incomeResult = await pool.query(
-					"SELECT COALESCE(SUM(amount), 0) AS totalIncome FROM transactions WHERE type = 'Money In' AND user_id = $1",
-					[userId]
-			);
+		// Query for total income
+		const incomeResult = await pool.query(
+			"SELECT COALESCE(SUM(amount), 0) AS totalIncome FROM transactions WHERE type = 'Money In' AND user_id = $1",
+			[userId],
+		);
 
-			// Query for total expenses
-			const expenseResult = await pool.query(
-					"SELECT COALESCE(SUM(amount), 0) AS totalExpense FROM transactions WHERE type = 'Expense' AND user_id = $1",
-					[userId]
-			);
+		// Query for total expenses
+		const expenseResult = await pool.query(
+			"SELECT COALESCE(SUM(amount), 0) AS totalExpense FROM transactions WHERE type = 'Expense' AND user_id = $1",
+			[userId],
+		);
 
-			// Debugging logs
-			console.log("Income Query Result:", incomeResult.rows);
-			console.log("Expense Query Result:", expenseResult.rows);
+		// Debugging logs
+		console.log("Income Query Result:", incomeResult.rows);
+		console.log("Expense Query Result:", expenseResult.rows);
 
-			// Parse results
-			const totalIncome = parseFloat(incomeResult.rows[0]?.totalincome || "0");
-			const totalExpense = parseFloat(expenseResult.rows[0]?.totalexpense || "0");
-			const balance = totalIncome - totalExpense;
+		// Parse results
+		const totalIncome = parseFloat(incomeResult.rows[0]?.totalincome || "0");
+		const totalExpense = parseFloat(expenseResult.rows[0]?.totalexpense || "0");
+		const balance = totalIncome - totalExpense;
 
-			// Debugging logs
-			console.log("Total Income:", totalIncome);
-			console.log("Total Expense:", totalExpense);
-			console.log("Balance:", balance);
+		// Debugging logs
+		console.log("Total Income:", totalIncome);
+		console.log("Total Expense:", totalExpense);
+		console.log("Balance:", balance);
 
-			// Send the summary data
-			res.json({ totalIncome, totalExpense, balance });
+		// Send the summary data
+		res.json({ totalIncome, totalExpense, balance });
 	} catch (error) {
-			console.error("Error fetching summary:", error);
-			res.status(500).json({ error: "Internal Server Error" });
+		console.error("Error fetching summary:", error);
+		res.status(500).json({ error: "Internal Server Error" });
 	}
 });
+
+// GET /budget/income
+app.get("/budget/income", async (req, res) => {
+	const user_id = req.session.user_id;
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		const incomeResult = await pool.query(
+			`SELECT COALESCE(SUM(amount), 0) AS total_income
+			 FROM transactions
+			 WHERE user_id = $1 AND type = 'Money In'`,
+			[user_id],
+		);
+
+		const expenseResult = await pool.query(
+			`SELECT COALESCE(SUM(amount), 0) AS total_expenses
+			 FROM transactions
+			 WHERE user_id = $1 AND type = 'Expense'`,
+			[user_id],
+		);
+
+		const totalIncome = parseFloat(incomeResult.rows[0].total_income);
+		const totalExpenses = parseFloat(expenseResult.rows[0].total_expenses);
+		const remainingBalance = totalIncome - totalExpenses;
+
+		res.json({ totalIncome, totalExpenses, remainingBalance });
+	} catch (err) {
+		console.error("Error fetching income and expenses:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// POST /budget: Save new budget
+app.post("/budget", async (req, res) => {
+	const { budgetFor, allocatedAmount, startDate, endDate, description } = req.body;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		await pool.query(
+			`INSERT INTO budgets (user_id, budget_for, allocated_amount, start_date, end_date, description)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+			[user_id, budgetFor, allocatedAmount, startDate, endDate, description],
+		);
+
+		res.status(201).json({ message: "Budget created successfully" });
+	} catch (err) {
+		console.error("Error saving budget:", err.message);
+		res.status(500).json({ error: "Failed to save budget" });
+	}
+});
+
 
 // Start server
 app.listen(3000, () => {

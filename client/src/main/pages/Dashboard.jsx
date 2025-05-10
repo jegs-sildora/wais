@@ -168,8 +168,8 @@ const Dashboard = () => {
 
 	return (
 		<>
-			<HomeSideBar />
-			<div className="bg-neutral-50">
+			<div className="bg-base-100">
+				<HomeSideBar />
 				<h1 className="font-secondary text-3xl pt-6 px-12">DASHBOARD</h1>
 				<div className="flex justify-center items-center space-x-4 py-5">
 					{/* Current Balance Card */}
@@ -179,7 +179,7 @@ const Dashboard = () => {
 								<Banknote className="text-forest-green" />
 								CURRENT BALANCE
 							</h2>
-							<p className="text-2xl font-bold">
+							<p className="text-2xl font-black">
 								₱ {(summary.balance || 0).toFixed(2)}
 							</p>
 						</div>
@@ -191,7 +191,7 @@ const Dashboard = () => {
 								<ArrowDown className="text-green-500" />
 								TOTAL INCOMING FUNDS
 							</h2>
-							<p className="text-2xl font-bold">
+							<p className="text-2xl font-black">
 								₱ {(summary.totalIncome || 0).toFixed(2)}
 							</p>
 						</div>
@@ -203,7 +203,7 @@ const Dashboard = () => {
 								<ArrowUp className="text-red-500" />
 								TOTAL OUTGOING FUNDS
 							</h2>
-							<p className="text-2xl font-bold text-red-500">
+							<p className="text-2xl font-black text-red-500">
 								₱ {(summary.totalExpense || 0).toFixed(2)}
 							</p>
 						</div>
@@ -274,21 +274,20 @@ const Dashboard = () => {
 											<option value="">Select Category</option>
 											{type === "Money In" ? (
 												<optgroup label="Incoming Funds">
-													<option value="Scholarship">Scholarship</option>
-													<option value="Part-Time Job">Part-Time Job</option>
 													<option value="Allowance">Allowance</option>
-													<option value="Grant">Grant</option>
-													<option value="Tutoring">Tutoring</option>
+													<option value="Income">Income</option>
+													<option value="Scholarship">Scholarship</option>
 												</optgroup>
 											) : (
 												<optgroup label="Outgoing Funds">
-													<option value="Tuition Fees">Tuition Fees</option>
-													<option value="Books and Supplies">
-														Books and Supplies
+													<option value="Books">Books</option>
+													<option value="Entertainment">Entertainment</option>
+													<option value="Food">Food</option>
+													<option value="Rent">Rent</option>
+													<option value="School Supplies">
+														School Supplies
 													</option>
 													<option value="Transportation">Transportation</option>
-													<option value="Food">Food</option>
-													<option value="Entertainment">Entertainment</option>
 													<option value="Utilities">Utilities</option>
 												</optgroup>
 											)}
@@ -338,8 +337,8 @@ const Dashboard = () => {
 				{/* Toast Container */}
 				<ToastContainer />
 				{transactions.length > 0 ? (
-					<div className="overflow-x-auto rounded-box px-50 mt-10 items-center">
-						<table className="table items-center">
+					<div className="overflow-x-auto rounded-box px-44 py-10 mt-10 items-center">
+						<table className="table items-center bg-white shadow-md">
 							{/* Table Header */}
 							<thead className="text-center">
 								<tr className="uppercase">
@@ -363,7 +362,13 @@ const Dashboard = () => {
 										<td>₱ {transaction.amount}</td>
 										<td>{transaction.category}</td>
 										<td>{transaction.description}</td>
-										<td>{transaction.date}</td>
+										<td>
+											{new Date(transaction.date).toLocaleDateString("en-US", {
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											})}
+										</td>
 										<td>
 											<button
 												className="btn btn-md rounded-4xl"
