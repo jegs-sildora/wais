@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from "sonner";
+import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
+import "react-toastify/dist/ReactToastify.css"; // Import react-toastify styles
 import * as motion from "motion/react-client";
 import FormNav from "../components/FormNav";
 import logo from "../assets/logo.png";
@@ -18,7 +19,7 @@ export default function Login() {
 		setLoading(true);
 
 		if (!usernameOrEmail || !password) {
-			toast.error("Please fill in all fields!");
+			toast.error("Please fill in all fields!"); // Use react-toastify
 			setLoading(false);
 			return;
 		}
@@ -45,14 +46,14 @@ export default function Login() {
 			console.log("Login response:", data);
 
 			if (response.ok) {
-				toast.success("Log in successfully!");
-				setTimeout(() => navigate("/home"), 2500);
+				toast.success("Logged in successfully!"); // Use react-toastify
+				setTimeout(() => navigate("/dashboard"), 2500);
 			} else {
-				toast.error(data.error || "Invalid credentials, please try again.");
+				toast.error(data.error || "Invalid credentials, please try again."); // Use react-toastify
 			}
 		} catch (err) {
 			console.error("Login failed:", err);
-			toast.error("An error occurred. Please try again.");
+			toast.error("An error occurred. Please try again."); // Use react-toastify
 		} finally {
 			setLoading(false);
 		}
@@ -64,6 +65,7 @@ export default function Login() {
 				title={"WAIS"}
 				textClassName="text-3xl lg:text-4xl"
 			/>
+			<ToastContainer /> {/* Add ToastContainer here */}
 			<div className='flex flex-col h-screen justify-center px-6 pt-26 md:pt-0 lg:pt-0 bg-[url("/src/assets/blurry_bg.svg")] bg-cover bg-center'>
 				<div>
 					<img

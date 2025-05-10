@@ -16,9 +16,8 @@ import ChangePassword from "./auth/ChangePassword.jsx";
 import LandingPage from "./LandingPage.jsx";
 
 //MAIN PAGE
-import Home from "./main/pages/Home.jsx";
 import ObserverProvider from "./components/ObserverProvider.jsx";
-import Budget from "./main/pages/Budget.jsx";
+import Dashboard from "./main/pages/Dashboard.jsx";
 
 const router = createBrowserRouter([
   {
@@ -35,10 +34,6 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
-    path: "/home",
-    element: <Home />,
-  },
-  {
     path: "/forgotpassword",
     element: <ForgotPassword />,
   },
@@ -47,8 +42,8 @@ const router = createBrowserRouter([
     element: <ChangePassword />,
   },
   {
-    path: "/budget",
-    element: <Budget />
+    path: "/dashboard",
+    element: <Dashboard />,
   }
 ]);
 
