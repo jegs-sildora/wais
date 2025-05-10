@@ -154,6 +154,169 @@ app.get("/currentuser", async (req, res) => {
 	}
 });
 
+//TRANSACTION: ADDING NEW TRANSACTION
+app.post("/transactions", async (req, res) => {
+	const { type, amount, category, description, date } = req.body;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+			return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+			console.log("Saving transaction for user:", user_id);
+			console.log("Transaction details:", { type, amount, category, description, date });
+
+			await pool.query(
+					`INSERT INTO transactions (user_id, type, amount, category, description, date)
+					 VALUES ($1, $2, $3, $4, $5, $6)`,
+					[user_id, type, amount, category, description, date],
+			);
+
+			res.status(201).json({ message: "Transaction saved successfully!" });
+	} catch (err) {
+			console.error("Error saving transaction:", err.message);
+			res.status(500).json({ error: "Failed to save transaction" });
+	}
+});
+
+// Fetch all transactions for the currently logged-in user
+app.get("/transactions", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		// Fetch all transactions for the logged-in user
+		const result = await pool.query(
+			"SELECT transaction_id, type, amount, category, description, date FROM transactions WHERE user_id = $1 ORDER BY date DESC",
+			[user_id],
+		);
+
+		res.json(result.rows); // Return the transactions as JSON
+	} catch (err) {
+		console.error("Error fetching transactions:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// Edit Transaction: Update an existing transaction
+app.put("/transactions/:transactionId", async (req, res) => {
+	const { transactionId } = req.params;
+	const { type, amount, category, description, date } = req.body;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		// Check if the transaction belongs to the logged-in user
+		const result = await pool.query(
+			"SELECT * FROM transactions WHERE transaction_id = $1 AND user_id = $2",
+			[transactionId, user_id],
+		);
+
+		if (result.rows.length === 0) {
+			return res
+				.status(404)
+				.json({ error: "Transaction not found or unauthorized" });
+		}
+
+		// Update the transaction
+		await pool.query(
+			`UPDATE transactions 
+       SET type = $1, amount = $2, category = $3, description = $4, date = $5
+       WHERE transaction_id = $6 AND user_id = $7`,
+			[type, amount, category, description, date, transactionId, user_id],
+		);
+
+		res.status(200).json({ message: "Transaction updated successfully!" });
+	} catch (err) {
+		console.error("Error updating transaction:", err.message);
+		res.status(500).json({ error: "Failed to update transaction" });
+	}
+});
+
+// Delete Transaction: Remove an existing transaction
+app.delete("/transactions/:transactionId", async (req, res) => {
+	const { transactionId } = req.params;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		// Check if the transaction belongs to the logged-in user
+		const result = await pool.query(
+			"SELECT * FROM transactions WHERE transaction_id = $1 AND user_id = $2",
+			[transactionId, user_id],
+		);
+
+		if (result.rows.length === 0) {
+			return res
+				.status(404)
+				.json({ error: "Transaction not found or unauthorized" });
+		}
+
+		// Delete the transaction
+		await pool.query(
+			"DELETE FROM transactions WHERE transaction_id = $1 AND user_id = $2",
+			[transactionId, user_id],
+		);
+
+		res.status(200).json({ message: "Transaction deleted successfully!" });
+	} catch (err) {
+		console.error("Error deleting transaction:", err.message);
+		res.status(500).json({ error: "Failed to delete transaction" });
+	}
+});
+
+// GET /transactions/summary
+app.get("/transactions/summary", async (req, res) => {
+	const userId = req.session.user_id; // Ensure user authentication
+	if (!userId) {
+			return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+			// Query for total income
+			const incomeResult = await pool.query(
+					"SELECT COALESCE(SUM(amount), 0) AS totalIncome FROM transactions WHERE type = 'Money In' AND user_id = $1",
+					[userId]
+			);
+
+			// Query for total expenses
+			const expenseResult = await pool.query(
+					"SELECT COALESCE(SUM(amount), 0) AS totalExpense FROM transactions WHERE type = 'Expense' AND user_id = $1",
+					[userId]
+			);
+
+			// Debugging logs
+			console.log("Income Query Result:", incomeResult.rows);
+			console.log("Expense Query Result:", expenseResult.rows);
+
+			// Parse results
+			const totalIncome = parseFloat(incomeResult.rows[0]?.totalincome || "0");
+			const totalExpense = parseFloat(expenseResult.rows[0]?.totalexpense || "0");
+			const balance = totalIncome - totalExpense;
+
+			// Debugging logs
+			console.log("Total Income:", totalIncome);
+			console.log("Total Expense:", totalExpense);
+			console.log("Balance:", balance);
+
+			// Send the summary data
+			res.json({ totalIncome, totalExpense, balance });
+	} catch (error) {
+			console.error("Error fetching summary:", error);
+			res.status(500).json({ error: "Internal Server Error" });
+	}
+});
+
 // Start server
 app.listen(3000, () => {
 	console.log("Server is running on http://localhost:3000");
