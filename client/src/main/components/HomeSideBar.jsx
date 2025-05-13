@@ -60,10 +60,10 @@ export default function HomeNavSideBar() {
 							className="menu menu-lg dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
 						>
 							<li>
-								<Link to="/dashboard">Dashboard</Link>
+								<Link to="/transactions">Transactions</Link>
 							</li>
 							<li>
-								<Link to="/budget">Budget</Link>
+								<Link to="/budget">Budgets</Link>
 							</li>
               <li>
 								<Link to="/reports">Reports</Link>

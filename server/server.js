@@ -1,3 +1,5 @@
+process.env.TZ = "Asia/Manila";
+
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
@@ -7,6 +9,15 @@ const bcrypt = require("bcrypt");
 
 const app = express();
 app.use(express.json());
+
+// Set timezone for PostgreSQL
+pool.query("SET TIME ZONE 'Asia/Manila';", (err) => {
+	if (err) {
+		console.error("Error setting timezone for PostgreSQL:", err.message);
+	} else {
+		console.log("Timezone set to Asia/Manila for PostgreSQL.");
+	}
+});
 
 // CORS configuration
 app.use(
@@ -161,6 +172,18 @@ app.post("/transactions", async (req, res) => {
 
 	if (!user_id) {
 		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	// Validate input lengths
+	if (type.length > 10) {
+		return res.status(400).json({
+			error: "Transaction type exceeds maximum length of 10 characters.",
+		});
+	}
+	if (category.length > 50) {
+		return res
+			.status(400)
+			.json({ error: "Category exceeds maximum length of 50 characters." });
 	}
 
 	try {
@@ -356,9 +379,10 @@ app.get("/budget/income", async (req, res) => {
 	}
 });
 
-// POST /budget: Save new budget
+// POST /budget: Save a new budget
 app.post("/budget", async (req, res) => {
-	const { budgetFor, allocatedAmount, startDate, endDate, description } = req.body;
+	const { budgetFor, allocatedAmount, startDate, endDate, description } =
+		req.body;
 	const user_id = req.session.user_id;
 
 	if (!user_id) {
@@ -366,19 +390,207 @@ app.post("/budget", async (req, res) => {
 	}
 
 	try {
-		await pool.query(
+		// Adjust the endDate to ensure no timezone offset
+		const adjustedEndDate = new Date(endDate);
+		adjustedEndDate.setHours(23, 59, 59, 999); // Set to the end of the day
+
+		const result = await pool.query(
 			`INSERT INTO budgets (user_id, budget_for, allocated_amount, start_date, end_date, description)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-			[user_id, budgetFor, allocatedAmount, startDate, endDate, description],
+			 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+			[
+				user_id,
+				budgetFor,
+				allocatedAmount,
+				startDate,
+				adjustedEndDate,
+				description,
+			],
 		);
 
-		res.status(201).json({ message: "Budget created successfully" });
+		res.status(201).json(result.rows[0]); // Return the newly created budget
 	} catch (err) {
 		console.error("Error saving budget:", err.message);
 		res.status(500).json({ error: "Failed to save budget" });
 	}
 });
 
+// GET /budget: Fetch all budgets for the logged-in user
+app.get("/budget", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		const result = await pool.query(
+			`SELECT 
+                b.budget_id AS id,
+                b.budget_for AS category, 
+                b.allocated_amount AS limit, 
+                COALESCE(SUM(t.amount), 0) AS spent, 
+                b.start_date, 
+                b.end_date,
+                b.daily_budget,
+                b.description
+            FROM budgets b
+            LEFT JOIN transactions t
+            ON b.user_id = t.user_id AND b.budget_for = t.category AND t.type = 'Expense'
+            WHERE b.user_id = $1
+            GROUP BY b.budget_id, b.budget_for, b.allocated_amount, b.start_date, b.end_date, b.daily_budget, b.description`,
+			[user_id],
+		);
+
+		res.json(result.rows);
+	} catch (err) {
+		console.error("Error fetching budgets:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// PUT /budget/:budgetId: Update an existing budget
+app.put("/budget/:budgetId", async (req, res) => {
+	const { budgetId } = req.params;
+	const { budgetFor, allocatedAmount, startDate, endDate, description } =
+		req.body;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	// Validate required fields
+	if (!budgetFor || !allocatedAmount || !startDate || !endDate) {
+		return res.status(400).json({ error: "All fields are required." });
+	}
+
+	try {
+		// Check if the budget belongs to the logged-in user
+		const result = await pool.query(
+			"SELECT * FROM budgets WHERE budget_id = $1 AND user_id = $2",
+			[budgetId, user_id],
+		);
+
+		if (result.rows.length === 0) {
+			return res
+				.status(404)
+				.json({ error: "Budget not found or unauthorized" });
+		}
+
+		// Update the budget
+		await pool.query(
+			`UPDATE budgets 
+       SET budget_for = $1, allocated_amount = $2, start_date = $3, end_date = $4, description = $5
+       WHERE budget_id = $6 AND user_id = $7`,
+			[
+				budgetFor,
+				allocatedAmount,
+				startDate,
+				endDate,
+				description,
+				budgetId,
+				user_id,
+			],
+		);
+
+		res.status(200).json({ message: "Budget updated successfully!" });
+	} catch (err) {
+		console.error("Error updating budget:", err.message);
+		res.status(500).json({ error: "Failed to update budget" });
+	}
+});
+
+// DELETE /budget/:budgetId: Remove an existing budget
+app.delete("/budget/:budgetId", async (req, res) => {
+	const { budgetId } = req.params;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		// Check if the budget belongs to the logged-in user
+		const result = await pool.query(
+			"SELECT * FROM budgets WHERE budget_id = $1 AND user_id = $2",
+			[budgetId, user_id],
+		);
+
+		if (result.rows.length === 0) {
+			return res
+				.status(404)
+				.json({ error: "Budget not found or unauthorized" });
+		}
+
+		// Delete the budget
+		await pool.query(
+			"DELETE FROM budgets WHERE budget_id = $1 AND user_id = $2",
+			[budgetId, user_id],
+		);
+
+		res.status(200).json({ message: "Budget deleted successfully!" });
+	} catch (err) {
+		console.error("Error deleting budget:", err.message);
+		res.status(500).json({ error: "Failed to delete budget" });
+	}
+});
+
+// GET /reports/monthly-expenses
+app.get("/reports/monthly-expenses", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		const result = await pool.query(
+			`SELECT 
+                TO_CHAR(date::DATE, 'YYYY-MM') AS month,
+                category,
+                SUM(amount) AS total_expense
+            FROM transactions
+            WHERE user_id = $1 AND type = 'Expense'
+            GROUP BY month, category
+            ORDER BY month, category`,
+			[user_id],
+		);
+
+		res.json(result.rows);
+	} catch (err) {
+		console.error("Error fetching monthly expenses:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+app.get("/reports/budget-vs-actual", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		const result = await pool.query(
+			`SELECT 
+				b.budget_for AS category, -- Use budget_for as the category
+				b.allocated_amount AS budget, -- Use allocated_amount as the budget
+				COALESCE(SUM(t.amount), 0) AS actual_spending
+			FROM budgets b
+			LEFT JOIN transactions t
+			ON b.budget_for = t.category AND t.user_id = $1 AND t.type = 'Expense'
+			WHERE b.user_id = $1
+			GROUP BY b.budget_for, b.allocated_amount
+			ORDER BY b.budget_for`,
+			[user_id],
+		);
+
+		res.json(result.rows);
+	} catch (err) {
+		console.error("Error fetching budget vs actual spending:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
 
 // Start server
 app.listen(3000, () => {

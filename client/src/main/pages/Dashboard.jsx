@@ -10,33 +10,75 @@ import "react-toastify/dist/ReactToastify.css";
 const Dashboard = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [type, setType] = useState("Money In");
-	const [amount, setAmount] = useState("");
+	const [amount, setAmount] = useState(null);
 	const [category, setCategory] = useState("");
 	const [description, setDescription] = useState("");
 	const [date, setDate] = useState(new Date());
 	const [transactions, setTransactions] = useState([]); // State to store fetched transactions
 	const [editTransaction, setEditTransaction] = useState(null); // State for the transaction being edited
+	const [dailyBudgets, setDailyBudgets] = useState([]); // State to store daily budgets
+	const notifiedCategories = new Set(); // Track categories that have triggered notifications
 
 	const toggleModal = () => setIsModalOpen(!isModalOpen);
 
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [transactionToDelete, setTransactionToDelete] = useState(null);
 
-	// Fetch transactions when the component mounts
+	// Fetch transactions and budgets when the component mounts
 	useEffect(() => {
-		const fetchTransactions = async () => {
+		const fetchTransactionsAndBudgets = async () => {
 			try {
-				const response = await axios.get("http://localhost:3000/transactions", {
-					withCredentials: true, // Ensure credentials are sent for session handling
-				});
-				setTransactions(response.data); // Set the fetched transactions to state
+				// Fetch transactions
+				const transactionsResponse = await axios.get(
+					"http://localhost:3000/transactions",
+					{ withCredentials: true },
+				);
+				setTransactions(transactionsResponse.data);
+
+				// Fetch budgets
+				const budgetsResponse = await axios.get(
+					"http://localhost:3000/budget",
+					{
+						withCredentials: true,
+					},
+				);
+				setDailyBudgets(budgetsResponse.data);
+
+				// Check for over-limit expenses
+				checkOverLimitExpenses(transactionsResponse.data, budgetsResponse.data);
 			} catch (err) {
-				console.error("Failed to fetch transactions:", err);
-				toast.error("Failed to load transactions.");
+				console.error("Failed to fetch data:", err);
+				toast.error("Failed to load data.");
 			}
 		};
-		fetchTransactions();
-	}, []); // Empty dependency array ensures this only runs once when the component mounts
+
+		fetchTransactionsAndBudgets();
+	}, []);
+
+	// Check if any category exceeds its daily budget
+	const checkOverLimitExpenses = (transactions, budgets) => {
+		// Calculate total expenses per category
+		const categoryExpenses = transactions.reduce((acc, transaction) => {
+			if (transaction.type === "Expense") {
+				acc[transaction.category] =
+					(acc[transaction.category] || 0) + transaction.amount;
+			}
+			return acc;
+		}, {});
+
+		// Compare with daily budgets
+		budgets.forEach((budget) => {
+			if (
+				categoryExpenses[budget.category] > budget.daily_budget &&
+				!notifiedCategories.has(budget.category)
+			) {
+				toast.warn(
+					`Warning: You have exceeded your daily budget for ${budget.category}!`,
+				);
+				notifiedCategories.add(budget.category); // Mark this category as notified
+			}
+		});
+	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -70,22 +112,20 @@ const Dashboard = () => {
 			setDate(new Date());
 			setEditTransaction(null);
 
-			// Refetch transactions and summary
+			// Refetch transactions and budgets
 			const transactionsResponse = await axios.get(
 				"http://localhost:3000/transactions",
-				{
-					withCredentials: true,
-				},
+				{ withCredentials: true },
 			);
 			setTransactions(transactionsResponse.data);
 
-			const summaryResponse = await axios.get(
-				"http://localhost:3000/transactions/summary",
-				{
-					withCredentials: true,
-				},
-			);
-			setSummary(summaryResponse.data);
+			const budgetsResponse = await axios.get("http://localhost:3000/budget", {
+				withCredentials: true,
+			});
+			setDailyBudgets(budgetsResponse.data);
+
+			// Recheck for over-limit expenses
+			checkOverLimitExpenses(transactionsResponse.data, budgetsResponse.data);
 
 			toggleModal();
 		} catch (err) {
@@ -170,7 +210,7 @@ const Dashboard = () => {
 		<>
 			<div className="bg-base-100">
 				<HomeSideBar />
-				<h1 className="font-secondary text-3xl pt-6 px-12">DASHBOARD</h1>
+				<h1 className="font-secondary text-3xl pt-6 px-12">TRANSACTIONS</h1>
 				<div className="flex justify-center items-center space-x-4 py-5">
 					{/* Current Balance Card */}
 					<div className="card w-96 shadow-sm bg-white">
