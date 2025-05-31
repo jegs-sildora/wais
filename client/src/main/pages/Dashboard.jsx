@@ -83,7 +83,16 @@ const Dashboard = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
-		const formattedDate = date.toISOString().split("T")[0];
+		// Format the date to Asia/Manila timezone
+		const options = {
+			timeZone: "Asia/Manila",
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		};
+		const formattedDate = new Intl.DateTimeFormat("en-CA", options).format(
+			date,
+		);
 
 		try {
 			if (editTransaction) {
@@ -123,6 +132,13 @@ const Dashboard = () => {
 				withCredentials: true,
 			});
 			setDailyBudgets(budgetsResponse.data);
+
+			// Refetch summary data
+			const summaryResponse = await axios.get(
+				"http://localhost:3000/transactions/summary",
+				{ withCredentials: true },
+			);
+			setSummary(summaryResponse.data);
 
 			// Recheck for over-limit expenses
 			checkOverLimitExpenses(transactionsResponse.data, budgetsResponse.data);
@@ -208,9 +224,10 @@ const Dashboard = () => {
 
 	return (
 		<>
-			<div className="bg-base-100">
+			<div className="bg-base-100 ml-65 min-h-screen p-6 relative">
 				<HomeSideBar />
-				<h1 className="font-secondary text-3xl pt-6 px-12">TRANSACTIONS</h1>
+				<h1 className="font-secondary text-3xl pt-6 text-center">TRANSACTIONS</h1>
+				<h1 className="font-secondary text-2xl pt-6 ml-4">Cash Flow</h1>
 				<div className="flex justify-center items-center space-x-4 py-5">
 					{/* Current Balance Card */}
 					<div className="card w-96 shadow-sm bg-white">
@@ -374,21 +391,21 @@ const Dashboard = () => {
 						</div>
 					</div>
 				)}
-				{/* Toast Container */}
 				<ToastContainer />
 				{transactions.length > 0 ? (
-					<div className="overflow-x-auto rounded-box px-44 py-10 mt-10 items-center">
+					<div className="overflow-x-auto rounded-box px-6 py-6 items-center">
+					<h1 className="font-secondary text-2xl pb-6 ml-4">Transaction History</h1>
 						<table className="table items-center bg-white shadow-md">
 							{/* Table Header */}
 							<thead className="text-center">
 								<tr className="uppercase">
-									<th>#</th>
-									<th>Type</th>
-									<th>Amount</th>
-									<th>Category</th>
-									<th>Description</th>
-									<th>Date</th>
-									<th>Actions</th>
+									<th className="py-6">#</th>
+									<th className="py-6">Type</th>
+									<th className="py-6">Amount</th>
+									<th className="py-6">Category</th>
+									<th className="py-6">Description</th>
+									<th className="py-6">Date</th>
+									<th className="py-6">Actions</th>
 								</tr>
 							</thead>
 							<tbody className="text-center">

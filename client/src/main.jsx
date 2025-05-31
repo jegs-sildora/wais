@@ -59,6 +59,7 @@ function App() {
 
   return (
     <ObserverProvider>
+      {/* ToastContainer is now globally available */}
       <ToastContainer
         position="top-right"
         autoClose={5000}

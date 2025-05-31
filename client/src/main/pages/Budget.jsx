@@ -3,8 +3,8 @@ import HomeNavSideBar from "../components/HomeSideBar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify"; // Import react-toastify
+import "react-toastify/dist/ReactToastify.css"; // Import react-toastify styles
 import BudgetCard from "../components/BudgetCard";
 
 export default function Budget() {
@@ -34,6 +34,25 @@ export default function Budget() {
 		fetchRemainingBalance();
 	}, []);
 
+	useEffect(() => {
+		const fetchBudgets = async () => {
+			try {
+				const response = await axios.get("http://localhost:3000/budget", {
+					withCredentials: true,
+				});
+				if (response.status === 200) {
+					setBudgets(response.data); // Update the budgets state with the fetched data
+				} else {
+					console.error("Failed to fetch budgets:", response.statusText);
+				}
+			} catch (error) {
+				console.error("Error fetching budgets:", error);
+			}
+		};
+
+		fetchBudgets(); // Fetch budgets when the component mounts
+	}, []);
+
 	const toggleModal = () => {
 		setIsModalOpen(!isModalOpen);
 	};
@@ -50,6 +69,7 @@ export default function Budget() {
 		e.preventDefault();
 
 		if (allocatedAmount > remainingBalance) {
+			console.log("Allocated amount exceeds remaining balance"); // Debugging
 			toast.error("Allocated amount exceeds your remaining balance!");
 			return;
 		}
@@ -83,18 +103,69 @@ export default function Budget() {
 			// Reset the form and close the modal
 			resetForm();
 			toggleModal();
+
+			console.log("Budget added successfully"); // Debugging
 			toast.success("Budget added successfully!");
 		} catch (error) {
 			console.error("Error adding budget:", error);
+
+			// Show error toaster
 			toast.error("Failed to add budget. Please try again.");
 		}
 	};
 
 	return (
 		<>
-			<div className="bg-base-100">
+			{/* Main Content */}
+			<div className="bg-base-100 ml-65 min-h-screen p-6 relative">
 				<HomeNavSideBar />
-				<h1 className="font-secondary text-3xl pt-6 px-12">BUDGETS</h1>
+				<h1 className="font-secondary text-3xl pt-6 text-center">BUDGETS</h1>
+
+				{/* Conditional Rendering for No Budgets */}
+				{budgets.length === 0 ? (
+					<div className="flex flex-col items-center justify-center mt-68">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="100"
+							height="100"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							className="text-gray-500 mb-4"
+						>
+							<circle
+								cx="12"
+								cy="12"
+								r="10"
+							></circle>
+							<line
+								x1="12"
+								y1="16"
+								x2="12"
+								y2="12"
+							></line>
+							<line
+								x1="12"
+								y1="8"
+								x2="12"
+								y2="8"
+							></line>
+						</svg>
+						<p className="text-lg font-semibold text-gray-500">
+							No budgets here yet — start by{" "}
+							<span className="font-bold">creating your first one!</span>
+						</p>
+					</div>
+				) : (
+					<BudgetCard
+						key={budgets.length} // Force re-render when budgets change
+						budgets={budgets}
+						setBudgets={setBudgets}
+					/>
+				)}
 
 				{/* Add Budget Button */}
 				<button
@@ -237,11 +308,6 @@ export default function Budget() {
 						</div>
 					</div>
 				)}
-				<BudgetCard
-					key={budgets.length} // Force re-render when budgets change
-					budgets={budgets}
-					setBudgets={setBudgets}
-				/>
 			</div>
 		</>
 	);

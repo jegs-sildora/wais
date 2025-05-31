@@ -1,11 +1,35 @@
-import { useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Wallet, BarChart, FileText, LogOut } from "lucide-react"; // Import icons
 
 export default function HomeNavSideBar() {
 	const modalRef = useRef(null);
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const navigate = useNavigate();
+	const [userData, setUserData] = useState({ username: "", email: "" });
+
+	useEffect(() => {
+		// Fetch user data from the database
+		const fetchUserData = async () => {
+			try {
+				const response = await fetch("http://localhost:3000/currentuser", {
+					method: "GET",
+					credentials: "include",
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setUserData(data);
+				} else {
+					toast.error("Failed to fetch user data.");
+				}
+			} catch (err) {
+				console.error("Error fetching user data:", err);
+				toast.error("An error occurred while fetching user data.");
+			}
+		};
+
+		fetchUserData();
+	}, []);
 
 	const handleLogout = async () => {
 		try {
@@ -32,88 +56,78 @@ export default function HomeNavSideBar() {
 
 	return (
 		<>
-			<div className="navbar bg-base-100 shadow-sm">
-				<div className="navbar-start ml-5">
-					<div className="dropdown">
-						<div
-							tabIndex={0}
-							role="button"
-							className="btn btn-ghost btn-circle"
+			{/* Fixed Left Sidebar with Top Layer */}
+			<div className="fixed top-0 left-0 h-full w-64 bg-base-100 shadow-lg flex flex-col z-50">
+				<div className="flex items-center justify-center py-6">
+					<a className="text-4xl text-forest-green font-secondary">WAIS</a>
+				</div>
+				<hr className="py-2"></hr>
+				<ul className="menu menu-lg p-4">
+					<li className="mb-1.5">
+						<NavLink
+							to="/transactions"
+							className={({ isActive }) =>
+								`flex items-center gap-2 p-2 rounded-lg ${
+									isActive
+										? "bg-bright-green w-56 font-bold"
+										: "hover:bg-gray-200"
+								}`
+							}
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								className="h-5 w-5"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth="2"
-									d="M4 6h16M4 12h16M4 18h7"
-								/>
-							</svg>
+							<Wallet size={20} /> Transactions
+						</NavLink>
+					</li>
+					<li className="mb-1.5">
+						<NavLink
+							to="/budget"
+							className={({ isActive }) =>
+								`flex items-center gap-2 p-2 rounded-lg ${
+									isActive
+										? "bg-bright-green w-56 font-bold"
+										: "hover:bg-gray-200"
+								}`
+							}
+						>
+							<BarChart size={20} /> Budgets
+						</NavLink>
+					</li>
+					<li className="mb-1.5">
+						<NavLink
+							to="/reports"
+							className={({ isActive }) =>
+								`flex items-center gap-2 p-2 rounded-lg ${
+									isActive
+										? "bg-bright-green w-56 font-bold"
+										: "hover:bg-gray-200"
+								}`
+							}
+						>
+							<FileText size={20} /> Reports
+						</NavLink>
+					</li>
+				</ul>
+				<div className="mt-auto p-4 flex items-center gap-4">
+					{/* Avatar */}
+					<div className="btn btn-ghost btn-circle avatar">
+						<div className="rounded-full">
+							<img
+								alt="Profile"
+								src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+							/>
 						</div>
-						<ul
-							tabIndex={0}
-							className="menu menu-lg dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
-						>
-							<li>
-								<Link to="/transactions">Transactions</Link>
-							</li>
-							<li>
-								<Link to="/budget">Budgets</Link>
-							</li>
-              <li>
-								<Link to="/reports">Reports</Link>
-							</li>
-						</ul>
 					</div>
-				</div>
-
-				<div className="flex">
-					<a className="btn btn-ghost text-4xl text-forest-green font-secondary">
-						WAIS
-					</a>
-				</div>
-
-				<div className="navbar-end mr-5">
-					<div className="relative">
-						<div
-							role="button"
-							className="btn btn-ghost btn-circle avatar"
-							onClick={() => setIsDropdownOpen((prev) => !prev)}
-						>
-							<div className="w-10 rounded-full">
-								<img
-									alt="Profile"
-									src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-								/>
-							</div>
-						</div>
-
-						{isDropdownOpen && (
-							<ul className="absolute right-0 mt-3 w-52 p-2 shadow menu menu-lg bg-base-100 rounded-box z-20">
-								<li>
-									<a>Profile</a>
-								</li>
-								<li>
-									<a>Settings</a>
-								</li>
-								<li>
-									<button
-										className="w-full text-left"
-										onClick={() => {
-											setIsDropdownOpen(false);
-											modalRef.current?.showModal();
-										}}
-									>
-										Log out
-									</button>
-								</li>
-							</ul>
-						)}
+					{/* User Info */}
+					<div className="flex flex-col text-sm">
+						<span className="font-bold">{userData.username}</span>
+						<hr></hr>
+						<span className="text-xs text-gray-500">{userData.email}</span>
+					</div>
+					{/* Logout Icon */}
+					<div
+						className="btn btn-ghost btn-circle ml-10"
+						onClick={() => modalRef.current?.showModal()}
+					>
+						<LogOut size={24} />
 					</div>
 				</div>
 			</div>

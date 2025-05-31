@@ -231,6 +231,36 @@ app.get("/transactions", async (req, res) => {
 	}
 });
 
+// GET /transactions/filter-by-month
+app.get("/transactions/filter-by-month", async (req, res) => {
+	const user_id = req.session.user_id;
+	const { month } = req.query; // Get the month from query parameters
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	if (!month) {
+		return res.status(400).json({ error: "Month query parameter is required" });
+	}
+
+	try {
+		// Fetch transactions filtered by the specified month
+		const result = await pool.query(
+			`SELECT transaction_id, type, amount, category, description, date
+            FROM transactions
+            WHERE user_id = $1 AND TO_CHAR(date::DATE, 'YYYY-MM') = $2
+            ORDER BY date DESC`,
+			[user_id, month],
+		);
+
+		res.json(result.rows); // Return the filtered transactions as JSON
+	} catch (err) {
+		console.error("Error fetching transactions by month:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
 // Edit Transaction: Update an existing transaction
 app.put("/transactions/:transactionId", async (req, res) => {
 	const { transactionId } = req.params;
@@ -324,19 +354,10 @@ app.get("/transactions/summary", async (req, res) => {
 			[userId],
 		);
 
-		// Debugging logs
-		console.log("Income Query Result:", incomeResult.rows);
-		console.log("Expense Query Result:", expenseResult.rows);
-
 		// Parse results
 		const totalIncome = parseFloat(incomeResult.rows[0]?.totalincome || "0");
 		const totalExpense = parseFloat(expenseResult.rows[0]?.totalexpense || "0");
 		const balance = totalIncome - totalExpense;
-
-		// Debugging logs
-		console.log("Total Income:", totalIncome);
-		console.log("Total Expense:", totalExpense);
-		console.log("Balance:", balance);
 
 		// Send the summary data
 		res.json({ totalIncome, totalExpense, balance });
@@ -390,7 +411,17 @@ app.post("/budget", async (req, res) => {
 	}
 
 	try {
-		// Adjust the endDate to ensure no timezone offset
+		// Adjust the startDate and endDate to ensure they are in Asia/Manila timezone
+		const adjustedStartDate = new Intl.DateTimeFormat("en-CA", {
+			timeZone: "Asia/Manila",
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		})
+			.format(new Date(startDate))
+			.split("-")
+			.join("-");
+
 		const adjustedEndDate = new Date(endDate);
 		adjustedEndDate.setHours(23, 59, 59, 999); // Set to the end of the day
 
@@ -401,7 +432,7 @@ app.post("/budget", async (req, res) => {
 				user_id,
 				budgetFor,
 				allocatedAmount,
-				startDate,
+				adjustedStartDate,
 				adjustedEndDate,
 				description,
 			],
@@ -432,7 +463,8 @@ app.get("/budget", async (req, res) => {
                 b.start_date, 
                 b.end_date,
                 b.daily_budget,
-                b.description
+                b.description,
+                MAX(t.date) AS last_transaction_date -- Add this to get the most recent transaction date
             FROM budgets b
             LEFT JOIN transactions t
             ON b.user_id = t.user_id AND b.budget_for = t.category AND t.type = 'Expense'
@@ -477,6 +509,15 @@ app.put("/budget/:budgetId", async (req, res) => {
 				.json({ error: "Budget not found or unauthorized" });
 		}
 
+		// Adjust the startDate and endDate to Asia/Manila timezone
+		const adjustedStartDate = new Date(
+			new Date(startDate).toLocaleString("en-US", { timeZone: "Asia/Manila" }),
+		);
+
+		const adjustedEndDate = new Date(
+			new Date(endDate).toLocaleString("en-US", { timeZone: "Asia/Manila" }),
+		);
+
 		// Update the budget
 		await pool.query(
 			`UPDATE budgets 
@@ -485,8 +526,8 @@ app.put("/budget/:budgetId", async (req, res) => {
 			[
 				budgetFor,
 				allocatedAmount,
-				startDate,
-				endDate,
+				adjustedStartDate,
+				adjustedEndDate,
 				description,
 				budgetId,
 				user_id,
@@ -565,29 +606,87 @@ app.get("/reports/monthly-expenses", async (req, res) => {
 
 app.get("/reports/budget-vs-actual", async (req, res) => {
 	const user_id = req.session.user_id;
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	const { month } = req.query;
+
+	try {
+		let queryParams = [user_id];
+		let dateFilterClause = "";
+		let spendingDateClause = "";
+
+		if (month) {
+			const startOfMonth = `${month}-01`;
+			const endOfMonth =
+				`${month}-01` + " + INTERVAL '1 month' - INTERVAL '1 day'";
+
+			dateFilterClause = `
+				AND b.start_date <= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day'
+				AND b.end_date >= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD'))
+			`;
+
+			spendingDateClause = `
+				AND t.date >= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD'))
+				AND t.date < DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD')) + INTERVAL '1 month'
+			`;
+
+			queryParams.push(startOfMonth);
+		}
+
+		const query = `
+			SELECT 
+				b.budget_for AS category,
+				b.allocated_amount AS budget,
+				COALESCE(SUM(
+					CASE 
+						WHEN t.type = 'Expense' ${spendingDateClause}
+						THEN t.amount 
+						ELSE 0 
+					END
+				), 0) AS actual_spending
+			FROM budgets b
+			LEFT JOIN transactions t
+				ON b.budget_for = t.category AND t.user_id = $1
+			WHERE b.user_id = $1
+			${dateFilterClause}
+			GROUP BY b.budget_for, b.allocated_amount
+			ORDER BY b.budget_for;
+		`;
+
+		const result = await pool.query(query, queryParams);
+		res.json(result.rows);
+	} catch (err) {
+		console.error("Error fetching budget vs actual spending:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// GET /reports/income-vs-expense
+app.get("/reports/income-vs-expense", async (req, res) => {
+	const user_id = req.session.user_id;
 
 	if (!user_id) {
 		return res.status(401).json({ error: "User not authenticated" });
 	}
 
 	try {
-		const result = await pool.query(
-			`SELECT 
-				b.budget_for AS category, -- Use budget_for as the category
-				b.allocated_amount AS budget, -- Use allocated_amount as the budget
-				COALESCE(SUM(t.amount), 0) AS actual_spending
-			FROM budgets b
-			LEFT JOIN transactions t
-			ON b.budget_for = t.category AND t.user_id = $1 AND t.type = 'Expense'
-			WHERE b.user_id = $1
-			GROUP BY b.budget_for, b.allocated_amount
-			ORDER BY b.budget_for`,
-			[user_id],
-		);
+		const query = `
+            SELECT 
+                TO_CHAR(date::DATE, 'YYYY-MM') AS month,
+                SUM(CASE WHEN type = 'Money In' THEN amount ELSE 0 END) AS income,
+                SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END) AS expense
+            FROM transactions
+            WHERE user_id = $1
+            GROUP BY month
+            ORDER BY month;
+		`;
 
-		res.json(result.rows);
+		const result = await pool.query(query, [user_id]);
+		res.json(result.rows); // Return the income vs expense data as JSON
 	} catch (err) {
-		console.error("Error fetching budget vs actual spending:", err.message);
+		console.error("Error fetching income vs expense trend:", err.message);
 		res.status(500).json({ error: "Internal server error" });
 	}
 });

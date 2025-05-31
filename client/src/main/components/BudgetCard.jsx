@@ -54,34 +54,33 @@ const BudgetCard = () => {
 						1, // Ensure at least 1 day to avoid division by zero
 					);
 					const remainingBudget = budget.limit - budget.spent;
-					const newDailyBudget = remainingBudget / remainingDays;
+					const newDailyBudget =
+						remainingDays > 0 ? remainingBudget / remainingDays : 0;
 
 					// Check if the user has overspent
 					if (
 						budget.spent > newDailyBudget &&
 						!notifiedBudgets.current.has(budget.id)
 					) {
+						// Mark the budget as notified before triggering the toast
+						notifiedBudgets.current.add(budget.id);
+
 						toast.warn(
 							`Warning: You have exceeded your daily budget for ${budget.category}!`,
 						);
-						notifiedBudgets.current.add(budget.id); // Mark this budget as notified
 					}
 
 					return {
 						...budget,
-						daily_budget: newDailyBudget, // Update the daily budget dynamically
+						daily_budget: isNaN(newDailyBudget) ? 0 : newDailyBudget, // Default to 0 if NaN
 					};
 				});
 
 				// Reset notifications for budgets that are no longer exceeding
 				notifiedBudgets.current.forEach((id) => {
-					if (
-						!updatedBudgets.some(
-							(budget) =>
-								budget.id === id && budget.spent > budget.daily_budget,
-						)
-					) {
-						notifiedBudgets.current.delete(id);
+					const budget = updatedBudgets.find((b) => b.id === id);
+					if (!budget || budget.spent <= budget.daily_budget) {
+						notifiedBudgets.current.delete(id); // Remove from notifiedBudgets
 					}
 				});
 
@@ -156,12 +155,24 @@ const BudgetCard = () => {
 			return;
 		}
 
+		// Convert dates to Asia/Manila timezone
+		const startDateInManila = new Date(
+			new Date(selectedBudget.start_date).toLocaleString("en-US", {
+				timeZone: "Asia/Manila",
+			}),
+		);
+		const endDateInManila = new Date(
+			new Date(selectedBudget.end_date).toLocaleString("en-US", {
+				timeZone: "Asia/Manila",
+			}),
+		);
+
 		// Prepare the data to send
 		const updatedBudget = {
 			budgetFor: selectedBudget.category, // Match backend field name
 			allocatedAmount: selectedBudget.limit, // Match backend field name
-			startDate: selectedBudget.start_date,
-			endDate: selectedBudget.end_date,
+			startDate: startDateInManila.toISOString(), // Send as ISO string
+			endDate: endDateInManila.toISOString(), // Send as ISO string
 			description: selectedBudget.description || "", // Optional field
 		};
 
@@ -210,7 +221,15 @@ const BudgetCard = () => {
 			{/* Toast Container */}
 			<ToastContainer />
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-12 mt-6">
+			<div
+				className={`grid ${
+					budgets.length === 1
+						? "grid-cols-1"
+						: budgets.length === 2
+							? "grid-cols-2"
+							: "grid-cols-3"
+				} gap-4 px-12 mt-6 flex-grow`}
+			>
 				{budgets.map((budget, index) => {
 					const { category, spent, limit, daily_budget, start_date, end_date } =
 						budget;
@@ -263,7 +282,7 @@ const BudgetCard = () => {
 							{/* Progress Info */}
 							<div className="text-sm text-forest-green mb-1">
 								Spent ₱{spent.toLocaleString()} of ₱{limit.toLocaleString()} (₱
-								{daily_budget.toFixed(2).toLocaleString()}/day)
+								{(Number(daily_budget) || 0).toFixed(2).toLocaleString()}/day)
 							</div>
 
 							{/* Progress Bar */}
@@ -343,12 +362,26 @@ const BudgetCard = () => {
 										type="number"
 										className="input input-bordered w-full font-extrabold"
 										value={selectedBudget.limit}
-										onChange={(e) =>
+										onChange={(e) => {
+											const newLimit = Number(e.target.value);
+											const today = new Date();
+											const endDate = new Date(selectedBudget.end_date);
+											const remainingDays = Math.max(
+												Math.ceil((endDate - today) / (1000 * 60 * 60 * 24)),
+												1, // Ensure at least 1 day to avoid division by zero
+											);
+											const remainingBudget = newLimit - selectedBudget.spent;
+											const newDailyBudget =
+												remainingDays > 0 ? remainingBudget / remainingDays : 0;
+
 											setSelectedBudget({
 												...selectedBudget,
-												limit: Number(e.target.value),
-											})
-										}
+												limit: newLimit,
+												daily_budget: isNaN(newDailyBudget)
+													? 0
+													: newDailyBudget, // Recalculate daily_budget
+											});
+										}}
 										required
 									/>
 								</div>
@@ -361,9 +394,23 @@ const BudgetCard = () => {
 										Start Date
 									</label>
 									<DatePicker
-										selected={new Date(selectedBudget.start_date)}
+										selected={
+											selectedBudget.start_date
+												? new Date(
+														new Date(selectedBudget.start_date).toLocaleString(
+															"en-US",
+															{
+																timeZone: "Asia/Manila",
+															},
+														),
+													)
+												: null
+										}
 										onChange={(date) =>
-											setSelectedBudget({ ...selectedBudget, start_date: date })
+											setSelectedBudget({
+												...selectedBudget,
+												start_date: date,
+											})
 										}
 										className="input input-bordered w-full font-extrabold"
 										dateFormat="MM-dd-yyyy"
@@ -374,9 +421,23 @@ const BudgetCard = () => {
 										End Date
 									</label>
 									<DatePicker
-										selected={new Date(selectedBudget.end_date)}
+										selected={
+											selectedBudget.end_date
+												? new Date(
+														new Date(selectedBudget.end_date).toLocaleString(
+															"en-US",
+															{
+																timeZone: "Asia/Manila",
+															},
+														),
+													)
+												: null
+										}
 										onChange={(date) =>
-											setSelectedBudget({ ...selectedBudget, end_date: date })
+											setSelectedBudget({
+												...selectedBudget,
+												end_date: date,
+											})
 										}
 										className="input input-bordered w-full font-extrabold"
 										dateFormat="MM-dd-yyyy"
