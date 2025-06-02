@@ -518,20 +518,21 @@ app.put("/budget/:budgetId", async (req, res) => {
 			new Date(endDate).toLocaleString("en-US", { timeZone: "Asia/Manila" }),
 		);
 
+		const extracted = [
+			budgetFor,
+			allocatedAmount,
+			adjustedStartDate,
+			adjustedEndDate,
+			description,
+			budgetId,
+			user_id,
+		];
 		// Update the budget
 		await pool.query(
 			`UPDATE budgets 
        SET budget_for = $1, allocated_amount = $2, start_date = $3, end_date = $4, description = $5
        WHERE budget_id = $6 AND user_id = $7`,
-			[
-				budgetFor,
-				allocatedAmount,
-				adjustedStartDate,
-				adjustedEndDate,
-				description,
-				budgetId,
-				user_id,
-			],
+			extracted,
 		);
 
 		res.status(200).json({ message: "Budget updated successfully!" });
@@ -674,19 +675,168 @@ app.get("/reports/income-vs-expense", async (req, res) => {
 	try {
 		const query = `
             SELECT 
-                TO_CHAR(date::DATE, 'YYYY-MM') AS month,
+                TO_CHAR(date::DATE, 'YYYY-MM-DD') AS day,
                 SUM(CASE WHEN type = 'Money In' THEN amount ELSE 0 END) AS income,
                 SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END) AS expense
             FROM transactions
             WHERE user_id = $1
-            GROUP BY month
-            ORDER BY month;
-		`;
+            GROUP BY day
+            ORDER BY day;
+        `;
 
 		const result = await pool.query(query, [user_id]);
-		res.json(result.rows); // Return the income vs expense data as JSON
+		res.json(result.rows); // Return the daily income vs expense data as JSON
 	} catch (err) {
-		console.error("Error fetching income vs expense trend:", err.message);
+		console.error("Error fetching daily income vs expense trend:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// POST /group-expense: Create a new group expense
+app.post("/group-expense", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		console.error("User not authenticated");
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	const {
+		expenseTitle,
+		amount,
+		startDate,
+		endDate,
+		numOfParticipants,
+		splitType,
+		yourPercentage,
+		otherPercentage,
+		groupCode,
+	} = req.body;
+
+	// Add input validation
+	if (
+		!expenseTitle ||
+		!amount ||
+		!startDate ||
+		!numOfParticipants ||
+		!splitType ||
+		!groupCode
+	) {
+		return res.status(400).json({ error: "Missing required fields" });
+	}
+
+	try {
+		const query = `
+        INSERT INTO groupexpense (
+            owner, 
+            expense_title, 
+            amount, 
+            start_date, 
+            end_date, 
+            num_participants, 
+            participants,
+            split_type, 
+            your_percentage, 
+            other_percentage,
+            group_code
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;
+    `;
+
+		const values = [
+			user_id,
+			expenseTitle,
+			parseFloat(amount),
+			startDate,
+			endDate ? endDate : null,
+			parseInt(numOfParticipants),
+			[],
+			splitType,
+			parseFloat(yourPercentage.replace("%", "")),
+			parseFloat(otherPercentage.replace("%", "")),
+			groupCode,
+		];
+
+		const result = await pool.query(query, values);
+
+		res.status(201).json({
+			message: "Group expense created successfully!",
+			groupExpense: result.rows[0],
+		});
+	} catch (err) {
+		console.error("Error creating group expense:", err.message);
+
+		// Return JSON error response
+		if (err.code === "23505") {
+			return res.status(400).json({ error: "Duplicate entry detected." });
+		}
+
+		if (err.code === "23502") {
+			return res.status(400).json({ error: "Missing required database field." });
+		}
+
+		return res.status(500).json({ error: "Failed to create group expense." });
+	}
+});
+
+// POST /group-expense/join: Join an existing group expense
+app.post("/group-expense/join", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	const { groupCode } = req.body;
+
+	if (!groupCode) {
+		return res.status(400).json({ error: "Group code is required." });
+	}
+
+	try {
+		// Find the group expense by group code
+		const groupExpenseResult = await pool.query(
+			"SELECT * FROM groupexpense WHERE group_code = $1",
+			[groupCode],
+		);
+
+		if (groupExpenseResult.rows.length === 0) {
+			return res.status(404).json({ error: "Group expense not found." });
+		}
+
+		const groupExpense = groupExpenseResult.rows[0];
+
+		// Check if user is already a participant
+		if (groupExpense.participants.includes(user_id)) {
+			return res
+				.status(400)
+				.json({ error: "You are already a participant in this group." });
+		}
+
+		// Check if the group is already full
+		if (groupExpense.participants.length >= groupExpense.num_participants) {
+			return res
+				.status(400)
+				.json({ error: "This group expense is already full." });
+		}
+
+		// Add the user to the participants array
+		const updatedParticipants = [...groupExpense.participants, user_id];
+
+		// Update the group expense with the new participant
+		await pool.query(
+			"UPDATE groupexpense SET participants = $1 WHERE group_code = $2",
+			[updatedParticipants, groupCode],
+		);
+
+		res.status(200).json({
+			message: "Successfully joined the group expense!",
+			groupExpense: {
+				...groupExpense,
+				participants: updatedParticipants,
+			},
+		});
+	} catch (err) {
+		console.error("Error joining group expense:", err.message);
 		res.status(500).json({ error: "Internal server error" });
 	}
 });

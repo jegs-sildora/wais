@@ -21,6 +21,7 @@ import ObserverProvider from "./components/ObserverProvider.jsx";
 import Dashboard from "./main/pages/Dashboard.jsx";
 import Budget from "./main/pages/Budget.jsx";
 import Reports from "./main/pages/Reports.jsx";
+import GroupExpense from "./main/pages/GroupExpense.jsx";
 
 // ROUTER SETUP
 const router = createBrowserRouter([
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
   { path: "/transactions", element: <Dashboard /> },
   { path: "/budget", element: <Budget /> },
   { path: "/reports", element: <Reports /> },
+  { path: "/groupexpense", element: <GroupExpense /> },
 ]);
 
 function App() {
