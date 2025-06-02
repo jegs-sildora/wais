@@ -771,7 +771,9 @@ app.post("/group-expense", async (req, res) => {
 		}
 
 		if (err.code === "23502") {
-			return res.status(400).json({ error: "Missing required database field." });
+			return res
+				.status(400)
+				.json({ error: "Missing required database field." });
 		}
 
 		return res.status(500).json({ error: "Failed to create group expense." });
@@ -783,7 +785,8 @@ app.post("/group-expense/join", async (req, res) => {
 	const user_id = req.session.user_id;
 
 	if (!user_id) {
-		return res.status(401).json({ error: "User not authenticated" });
+		console.error("User not authenticated");
+		return res.status(401).json({ error: "User not authenticated." });
 	}
 
 	const { groupCode } = req.body;
@@ -800,44 +803,78 @@ app.post("/group-expense/join", async (req, res) => {
 		);
 
 		if (groupExpenseResult.rows.length === 0) {
-			return res.status(404).json({ error: "Group expense not found." });
+			return res.status(404).json({ error: "Invalid group code." });
 		}
 
 		const groupExpense = groupExpenseResult.rows[0];
 
+		// Check if user is the owner
+		if (groupExpense.owner === user_id) {
+			return res.status(400).json({ error: "You cannot join your own group." });
+		}
+
 		// Check if user is already a participant
-		if (groupExpense.participants.includes(user_id)) {
+		if (
+			groupExpense.participants &&
+			groupExpense.participants.includes(user_id)
+		) {
 			return res
 				.status(400)
-				.json({ error: "You are already a participant in this group." });
+				.json({ error: "You are already a member of this group." });
 		}
 
 		// Check if the group is already full
-		if (groupExpense.participants.length >= groupExpense.num_participants) {
-			return res
-				.status(400)
-				.json({ error: "This group expense is already full." });
+		const currentParticipants = groupExpense.participants
+			? groupExpense.participants.length
+			: 0;
+		const maxParticipants = groupExpense.num_participants - 1; 
+
+		if (currentParticipants >= maxParticipants) {
+			return res.status(400).json({
+				error: `Oops! This group is already full!`,
+			});
 		}
 
 		// Add the user to the participants array
-		const updatedParticipants = [...groupExpense.participants, user_id];
+		const updatedParticipants = groupExpense.participants
+			? [...groupExpense.participants, user_id]
+			: [user_id];
 
 		// Update the group expense with the new participant
-		await pool.query(
-			"UPDATE groupexpense SET participants = $1 WHERE group_code = $2",
+		const updateResult = await pool.query(
+			"UPDATE groupexpense SET participants = $1 WHERE group_code = $2 RETURNING *",
 			[updatedParticipants, groupCode],
 		);
 
+		// Calculate remaining slots
+		const remainingSlots = maxParticipants - updatedParticipants.length;
+
 		res.status(200).json({
-			message: "Successfully joined the group expense!",
-			groupExpense: {
-				...groupExpense,
-				participants: updatedParticipants,
+			message: `Successfully joined the group! ${remainingSlots} slot(s) remaining.`,
+			groupExpense: updateResult.rows[0],
+			participantInfo: {
+				currentParticipants: updatedParticipants.length,
+				maxParticipants: maxParticipants,
+				remainingSlots: remainingSlots,
 			},
 		});
 	} catch (err) {
 		console.error("Error joining group expense:", err.message);
-		res.status(500).json({ error: "Internal server error" });
+
+		// Handle specific database errors
+		if (err.code === "23505") {
+			return res
+				.status(400)
+				.json({ error: "Unable to join group due to duplicate entry" });
+		}
+
+		if (err.code === "23502") {
+			return res.status(400).json({ error: "Invalid group data" });
+		}
+
+		return res
+			.status(500)
+			.json({ error: "Failed to join group expense. Please try again." });
 	}
 });
 
