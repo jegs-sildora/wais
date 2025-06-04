@@ -10,13 +10,6 @@
 	.font-secondary {
 		font-family: "Parafina", sans-serif;
 	}
-
-	@media (max-width: 2000px) {
-		:root {
-			scrollbar-color: #9fe870 #163300;
-			scrollbar-width: thin;
-		}
-	}
 }
 
 @font-face {

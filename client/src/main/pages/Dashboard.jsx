@@ -268,7 +268,7 @@ const Dashboard = () => {
 				</div>
 				{/* Floating Add Button */}
 				<button
-					className="btn btn-primary fixed bottom-10 right-10 rounded-full text-2xl p-0 w-16 h-16"
+					className="btn btn-primary fixed bottom-10 right-10 rounded-full text-2xl p-0 w-16 h-16 z-100"
 					onClick={toggleModal}
 				>
 					+

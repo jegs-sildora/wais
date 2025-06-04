@@ -123,41 +123,66 @@ export default function Budget() {
 
 				{/* Conditional Rendering for No Budgets */}
 				{budgets.length === 0 ? (
-					<div className="flex flex-col items-center justify-center mt-68">
+					<div className="flex flex-col items-center justify-center h-132 mt-20">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							width="100"
-							height="100"
+							width="120"
+							height="120"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
-							strokeWidth="2"
+							strokeWidth="1.5"
 							strokeLinecap="round"
 							strokeLinejoin="round"
-							className="text-gray-500 mb-4"
+							className="text-gray-400 mb-6"
 						>
-							<circle
-								cx="12"
-								cy="12"
-								r="10"
-							></circle>
+							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+							<polyline points="14,2 14,8 20,8"></polyline>
 							<line
-								x1="12"
-								y1="16"
-								x2="12"
-								y2="12"
+								x1="16"
+								y1="13"
+								x2="8"
+								y2="13"
 							></line>
 							<line
-								x1="12"
-								y1="8"
-								x2="12"
-								y2="8"
+								x1="16"
+								y1="17"
+								x2="8"
+								y2="17"
 							></line>
+							<polyline points="10,9 9,9 8,9"></polyline>
 						</svg>
-						<p className="text-lg font-semibold text-gray-500">
-							No budgets here yet — start by{" "}
-							<span className="font-bold">creating your first one!</span>
+						<h3 className="text-2xl font-bold text-gray-500 mb-2">
+							No Budgets Available Yet
+						</h3>
+						<p className="text-lg text-center max-w-lg">
+							No reports here yet — start by{" "}
+							<span className="font-semibold text-forest-green">
+								creating your first one!
+							</span>
 						</p>
+						<div className="mt-6 flex items-center gap-2 text-sm text-gray-400">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<line
+									x1="12"
+									y1="1"
+									x2="12"
+									y2="23"
+								></line>
+								<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+							</svg>
+							<span>Budget • Track • Analyze • Improve</span>
+						</div>
 					</div>
 				) : (
 					<BudgetCard

@@ -1,5 +1,6 @@
 import HomeSideBar from "../components/HomeSideBar";
-import { useState } from "react";
+import GroupExpenseCard from "../components/GroupExpenseCard";
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -98,6 +99,12 @@ export default function GroupExpense() {
 					setYourPercentage("50%");
 					setOtherPercentage("50%");
 					toggleModal();
+
+					// Dispatch custom event to notify GroupExpenseCard
+					window.dispatchEvent(new CustomEvent("groupExpenseCreated"));
+
+					// Also update localStorage to trigger storage event
+					localStorage.setItem("lastExpenseCreated", Date.now().toString());
 				} else {
 					toast.error(result.error || "Failed to create group expense.");
 				}
@@ -137,12 +144,71 @@ export default function GroupExpense() {
 				toast.success(result.message);
 				setJoinGroupCode(""); // Reset the input
 				toggleModal();
+
+				// Dispatch custom event to notify GroupExpenseCard
+				window.dispatchEvent(new CustomEvent("groupExpenseCreated"));
+
+				// Also update localStorage to trigger storage event
+				localStorage.setItem("lastExpenseCreated", Date.now().toString());
 			} else {
 				toast.error(result.error || "Failed to join group expense");
 			}
 		} catch (err) {
 			console.error("Error joining group expense:", err.message);
 			toast.error("An unexpected error occurred");
+		}
+	};
+
+	// Add useEffect to recalculate percentages when participants or split type changes
+	useEffect(() => {
+		// Check if numOfParticipants is valid (not empty and greater than 0)
+		if (!numOfParticipants || numOfParticipants <= 0) {
+			setYourPercentage("0%");
+			setOtherPercentage("0%");
+			return;
+		}
+
+		if (splitType === "Equal") {
+			const equalPercentage = (100 / numOfParticipants).toFixed(1);
+			setYourPercentage(`${equalPercentage}%`);
+			setOtherPercentage(`${equalPercentage}%`);
+		} else {
+			// For percentage split, recalculate other percentage when participants change
+			const yourValue = parseInt(yourPercentage.replace("%", ""), 10);
+			const remainingPercentage = 100 - yourValue;
+			const otherValue = remainingPercentage / (numOfParticipants - 1);
+			setOtherPercentage(`${otherValue.toFixed(2)}%`);
+		}
+	}, [numOfParticipants, splitType]);
+
+	// Update the participants input change handler
+	const handleParticipantsChange = (e) => {
+		const value = e.target.value;
+
+		// Allow empty input for better UX
+		if (value === "") {
+			setNumOfParticipants("");
+			return;
+		}
+
+		const numValue = parseInt(value, 10);
+
+		// Validate the number is within reasonable bounds
+		if (numValue >= 2 && numValue <= 50) {
+			setNumOfParticipants(numValue);
+		}
+	};
+
+	// Update the your percentage change handler
+	const handleYourPercentageChange = (e) => {
+		const value = parseInt(e.target.value.replace("%", ""), 10);
+		setYourPercentage(`${value}%`);
+
+		if (splitType === "Percentage") {
+			// Calculate the percentage for other participants
+			const remainingPercentage = 100 - value;
+			const otherValue = remainingPercentage / (numOfParticipants - 1);
+			setOtherPercentage(`${otherValue.toFixed(2)}%`);
 		}
 	};
 
@@ -153,6 +219,9 @@ export default function GroupExpense() {
 				<h1 className="font-secondary text-3xl pt-6 text-center">
 					GROUP EXPENSE
 				</h1>
+
+				{/* Group Expense Cards */}
+				<GroupExpenseCard />
 
 				{/* Floating Add Button */}
 				<button
@@ -216,7 +285,7 @@ export default function GroupExpense() {
 										<input
 											type="text"
 											className="input input-bordered w-full font-extrabold"
-											placeholder="Enter expense / group title"
+											placeholder="---"
 											value={expenseTitle}
 											onChange={(e) => setExpenseTitle(e.target.value)}
 											required
@@ -232,14 +301,11 @@ export default function GroupExpense() {
 												type="number"
 												className="input input-bordered w-full font-extrabold"
 												placeholder="---"
-												value={numOfParticipants}
-												onChange={(e) => {
-													const value = e.target.value;
-													setNumOfParticipants(
-														value === "" ? "" : Number(value),
-													);
-												}}
-												min="1"
+												value={numOfParticipants || ""}
+												onChange={handleParticipantsChange}
+												min="2"
+												max="50"
+												step="1"
 												required
 											/>
 										</div>
@@ -250,7 +316,7 @@ export default function GroupExpense() {
 											<input
 												type="number"
 												className="input input-bordered w-full font-extrabold"
-												placeholder="Enter amount"
+												placeholder="---"
 												value={amount}
 												onChange={(e) => setAmount(e.target.value)}
 												required
@@ -322,76 +388,70 @@ export default function GroupExpense() {
 										<div className="flex space-x-4">
 											{/* You */}
 											<div className="flex-1">
-												<label className="block text-sm font-bold py-2">
+												<label className="block text-sm font-bold py-2 text-center">
 													You
 												</label>
-												<select
-													className="select select-bordered w-full font-extrabold"
-													value={splitType === "Equal" ? "50%" : yourPercentage}
-													onChange={(e) => {
-														const value = parseInt(
-															e.target.value.replace("%", ""),
-															10,
-														);
-														setYourPercentage(`${value}%`);
-														if (splitType === "Percentage") {
-															// Calculate the percentage for other participants
-															const remainingPercentage = 100 - value;
-															const otherValue =
-																remainingPercentage / (numOfParticipants - 1); // Divide remaining percentage evenly
-															setOtherPercentage(`${otherValue.toFixed(2)}%`); // Ensure precision
+												{splitType === "Equal" ? (
+													<input
+														type="text"
+														className="input input-bordered w-full font-extrabold"
+														value={
+															!numOfParticipants || numOfParticipants <= 0
+																? "0%"
+																: `${(100 / numOfParticipants).toFixed(1)}%`
 														}
-													}}
-													disabled={splitType === "Equal"} // Disable dropdown if split type is Equal
-												>
-													{Array.from({ length: 11 }, (_, i) => {
-														const percentage = i * 10; // Generate percentages from 0% to 100%
-														return (
-															<option
-																key={percentage}
-																value={`${percentage}%`}
-															>
-																{percentage}%
-															</option>
-														);
-													})}
-												</select>
-											</div>
-
-											{/* Other */}
-											<div className="flex-1">
-												<label className="block text-sm font-bold py-2">
-													Other Participant(s)
-												</label>
-												<select
-													className="select select-bordered w-full font-extrabold"
-													value={
-														splitType === "Equal"
-															? `${Math.round(100 / numOfParticipants)}%`
-															: otherPercentage
-													}
-													disabled // Always disabled since "Other" is calculated automatically
-												>
-													{Array.from(
-														{ length: numOfParticipants - 1 },
-														(_, i) => {
-															const percentage =
-																splitType === "Equal"
-																	? Math.round(100 / numOfParticipants)
-																	: parseFloat(
-																			otherPercentage.replace("%", ""),
-																		);
+														disabled
+														readOnly
+													/>
+												) : (
+													<select
+														className="select select-bordered w-full font-extrabold"
+														value={yourPercentage}
+														onChange={handleYourPercentageChange}
+													>
+														{Array.from({ length: 21 }, (_, i) => {
+															const percentage = i * 5; // Generate percentages from 0% to 100% in 5% increments
 															return (
 																<option
-																	key={i}
+																	key={percentage}
 																	value={`${percentage}%`}
 																>
 																	{percentage}%
 																</option>
 															);
-														},
-													)}
-												</select>
+														})}
+													</select>
+												)}
+											</div>
+
+											{/* Other Participants */}
+											<div className="flex-1">
+												<label className="block text-sm font-bold py-2 text-center">
+													Other Participant(s)
+												</label>
+												<input
+													type="text"
+													className="input input-bordered w-full font-extrabold"
+													value={
+														!numOfParticipants || numOfParticipants <= 0
+															? "0%"
+															: splitType === "Equal"
+																? `${(100 / numOfParticipants).toFixed(1)}%`
+																: `${parseFloat(
+																		otherPercentage.replace("%", ""),
+																	).toFixed(1)}%`
+													}
+													disabled
+													readOnly
+												/>
+												{splitType === "Percentage" && (
+													<div className="text-xs text-gray-500 mt-1 text-center">
+														Total for others:{" "}
+														{100 -
+															parseInt(yourPercentage.replace("%", ""), 10)}
+														%
+													</div>
+												)}
 											</div>
 										</div>
 									</div>
@@ -424,7 +484,7 @@ export default function GroupExpense() {
 										<input
 											type="text"
 											className="input input-bordered w-full font-extrabold"
-											placeholder="Enter group code"
+											placeholder="---"
 											value={joinGroupCode}
 											onChange={(e) =>
 												setJoinGroupCode(e.target.value.toUpperCase())

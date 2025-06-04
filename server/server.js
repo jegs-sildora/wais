@@ -165,6 +165,30 @@ app.get("/currentuser", async (req, res) => {
 	}
 });
 
+// GET /auth/me: Get current user information
+app.get("/auth/me", async (req, res) => {
+	const userId = req.session.user_id;
+
+	if (!userId) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		const query =
+			"SELECT user_id, username, email FROM users WHERE user_id = $1";
+		const result = await pool.query(query, [userId]);
+
+		if (result.rows.length === 0) {
+			return res.status(404).json({ error: "User not found" });
+		}
+
+		res.json(result.rows[0]);
+	} catch (error) {
+		console.error("Error fetching current user:", error);
+		res.status(500).json({ error: "Failed to fetch user information" });
+	}
+});
+
 //TRANSACTION: ADDING NEW TRANSACTION
 app.post("/transactions", async (req, res) => {
 	const { type, amount, category, description, date } = req.body;
@@ -187,15 +211,6 @@ app.post("/transactions", async (req, res) => {
 	}
 
 	try {
-		console.log("Saving transaction for user:", user_id);
-		console.log("Transaction details:", {
-			type,
-			amount,
-			category,
-			description,
-			date,
-		});
-
 		await pool.query(
 			`INSERT INTO transactions (user_id, type, amount, category, description, date)
 					 VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -624,37 +639,38 @@ app.get("/reports/budget-vs-actual", async (req, res) => {
 				`${month}-01` + " + INTERVAL '1 month' - INTERVAL '1 day'";
 
 			dateFilterClause = `
-				AND b.start_date <= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day'
-				AND b.end_date >= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD'))
-			`;
+							AND b.start_date <= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day'
+							AND b.end_date >= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD'))
+					`;
 
 			spendingDateClause = `
-				AND t.date >= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD'))
-				AND t.date < DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD')) + INTERVAL '1 month'
-			`;
+							AND t.date >= DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD'))
+							AND t.date < DATE_TRUNC('month', TO_DATE($2, 'YYYY-MM-DD')) + INTERVAL '1 month'
+					`;
 
 			queryParams.push(startOfMonth);
 		}
 
 		const query = `
-			SELECT 
-				b.budget_for AS category,
-				b.allocated_amount AS budget,
-				COALESCE(SUM(
-					CASE 
-						WHEN t.type = 'Expense' ${spendingDateClause}
-						THEN t.amount 
-						ELSE 0 
-					END
-				), 0) AS actual_spending
-			FROM budgets b
-			LEFT JOIN transactions t
-				ON b.budget_for = t.category AND t.user_id = $1
-			WHERE b.user_id = $1
-			${dateFilterClause}
-			GROUP BY b.budget_for, b.allocated_amount
-			ORDER BY b.budget_for;
-		`;
+					SELECT 
+							b.budget_for AS category,
+							b.allocated_amount AS budget,
+							TO_CHAR(b.start_date, 'YYYY-MM') AS month,
+							COALESCE(SUM(
+									CASE 
+											WHEN t.type = 'Expense' ${spendingDateClause}
+											THEN t.amount 
+											ELSE 0 
+									END
+							), 0) AS actual_spending
+					FROM budgets b
+					LEFT JOIN transactions t
+							ON b.budget_for = t.category AND t.user_id = $1
+					WHERE b.user_id = $1
+					${dateFilterClause}
+					GROUP BY b.budget_for, b.allocated_amount, b.start_date
+					ORDER BY b.budget_for;
+			`;
 
 		const result = await pool.query(query, queryParams);
 		res.json(result.rows);
@@ -726,6 +742,46 @@ app.post("/group-expense", async (req, res) => {
 	}
 
 	try {
+		// Improved date parsing with validation
+		let adjustedStartDate;
+		let adjustedEndDate = null;
+
+		// Parse start date
+		if (startDate) {
+			const startDateObj = new Date(startDate);
+			if (isNaN(startDateObj.getTime())) {
+				return res.status(400).json({ error: "Invalid start date format" });
+			}
+			// Set to beginning of day in Asia/Manila timezone
+			adjustedStartDate = new Date(
+				startDateObj.getFullYear(),
+				startDateObj.getMonth(),
+				startDateObj.getDate(),
+				0,
+				0,
+				0,
+			);
+		} else {
+			return res.status(400).json({ error: "Start date is required" });
+		}
+
+		// Parse end date if provided
+		if (endDate) {
+			const endDateObj = new Date(endDate);
+			if (isNaN(endDateObj.getTime())) {
+				return res.status(400).json({ error: "Invalid end date format" });
+			}
+			// Set to end of day in Asia/Manila timezone
+			adjustedEndDate = new Date(
+				endDateObj.getFullYear(),
+				endDateObj.getMonth(),
+				endDateObj.getDate(),
+				23,
+				59,
+				59,
+			);
+		}
+
 		const query = `
         INSERT INTO groupexpense (
             owner, 
@@ -746,8 +802,8 @@ app.post("/group-expense", async (req, res) => {
 			user_id,
 			expenseTitle,
 			parseFloat(amount),
-			startDate,
-			endDate ? endDate : null,
+			adjustedStartDate,
+			adjustedEndDate,
 			parseInt(numOfParticipants),
 			[],
 			splitType,
@@ -827,7 +883,7 @@ app.post("/group-expense/join", async (req, res) => {
 		const currentParticipants = groupExpense.participants
 			? groupExpense.participants.length
 			: 0;
-		const maxParticipants = groupExpense.num_participants - 1; 
+		const maxParticipants = groupExpense.num_participants - 1;
 
 		if (currentParticipants >= maxParticipants) {
 			return res.status(400).json({
@@ -850,7 +906,7 @@ app.post("/group-expense/join", async (req, res) => {
 		const remainingSlots = maxParticipants - updatedParticipants.length;
 
 		res.status(200).json({
-			message: `Successfully joined the group! ${remainingSlots} slot(s) remaining.`,
+			message: `Successfully joined the group!`,
 			groupExpense: updateResult.rows[0],
 			participantInfo: {
 				currentParticipants: updatedParticipants.length,
@@ -875,6 +931,475 @@ app.post("/group-expense/join", async (req, res) => {
 		return res
 			.status(500)
 			.json({ error: "Failed to join group expense. Please try again." });
+	}
+});
+
+// GET /group-expense: Fetch all group expenses for the logged-in user
+app.get("/group-expense", async (req, res) => {
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		// Fetch group expenses where user is either owner or participant
+		const result = await pool.query(
+			`SELECT 
+                groupexpense_id as id,
+                owner,
+                expense_title,
+                amount,
+                start_date,
+                end_date,
+                num_participants,
+                participants,
+                split_type,
+                your_percentage,
+                other_percentage,
+                group_code,
+                created_at
+            FROM groupexpense 
+            WHERE owner = $1 OR $1 = ANY(participants)
+            ORDER BY created_at DESC`,
+			[user_id],
+		);
+
+		// For each group expense, fetch participant usernames
+		const groupExpensesWithUsernames = await Promise.all(
+			result.rows.map(async (expense) => {
+				let participantUsernames = [];
+
+				if (expense.participants && expense.participants.length > 0) {
+					// Fetch usernames for all participants
+					const participantResult = await pool.query(
+						`SELECT user_id, username FROM users WHERE user_id = ANY($1)`,
+						[expense.participants],
+					);
+					participantUsernames = participantResult.rows;
+				}
+
+				// Fetch owner username
+				const ownerResult = await pool.query(
+					`SELECT username FROM users WHERE user_id = $1`,
+					[expense.owner],
+				);
+
+				return {
+					...expense,
+					owner_username: ownerResult.rows[0]?.username || "Unknown",
+					participant_usernames: participantUsernames,
+				};
+			}),
+		);
+
+		res.json(groupExpensesWithUsernames);
+	} catch (err) {
+		console.error("Error fetching group expenses:", err.message);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// PUT /group-expense/:id: Update an existing group expense
+app.put("/group-expense/:id", async (req, res) => {
+	const { id } = req.params;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	const {
+		expenseTitle,
+		amount,
+		startDate,
+		endDate,
+		numOfParticipants,
+		splitType,
+		yourPercentage,
+		otherPercentage,
+		groupCode,
+	} = req.body;
+
+	try {
+		// First, check if the group expense exists
+		const existsResult = await pool.query(
+			"SELECT owner, expense_title FROM groupexpense WHERE groupexpense_id = $1",
+			[id],
+		);
+
+		if (existsResult.rows.length === 0) {
+			return res.status(404).json({
+				error: "Group expense not found",
+				message:
+					"The group expense you're trying to update doesn't exist or may have been deleted.",
+			});
+		}
+
+		const groupExpense = existsResult.rows[0];
+
+		// Check if the current user is the owner
+		if (groupExpense.owner !== user_id) {
+			return res.status(403).json({
+				error: "Access denied",
+				message: `Only the owner of "${groupExpense.expense_title}" can make changes to this group expense. Contact the group owner if you need updates.`,
+			});
+		}
+
+		// Improved date parsing with validation for updates
+		let adjustedStartDate;
+		let adjustedEndDate = null;
+
+		// Parse start date
+		if (startDate) {
+			const startDateObj = new Date(startDate);
+			if (isNaN(startDateObj.getTime())) {
+				return res.status(400).json({ error: "Invalid start date format" });
+			}
+			adjustedStartDate = new Date(
+				startDateObj.getFullYear(),
+				startDateObj.getMonth(),
+				startDateObj.getDate(),
+				0,
+				0,
+				0,
+			);
+		} else {
+			return res.status(400).json({ error: "Start date is required" });
+		}
+
+		// Parse end date if provided
+		if (endDate) {
+			const endDateObj = new Date(endDate);
+			if (isNaN(endDateObj.getTime())) {
+				return res.status(400).json({ error: "Invalid end date format" });
+			}
+			adjustedEndDate = new Date(
+				endDateObj.getFullYear(),
+				endDateObj.getMonth(),
+				endDateObj.getDate(),
+				23,
+				59,
+				59,
+			);
+		}
+
+		// Update the group expense
+		const updateResult = await pool.query(
+			`UPDATE groupexpense 
+            SET 
+                expense_title = $1,
+                amount = $2,
+                start_date = $3,
+                end_date = $4,
+                num_participants = $5,
+                split_type = $6,
+                your_percentage = $7,
+                other_percentage = $8,
+                group_code = $9
+            WHERE groupexpense_id = $10 AND owner = $11
+            RETURNING *`,
+			[
+				expenseTitle,
+				parseFloat(amount),
+				adjustedStartDate,
+				adjustedEndDate,
+				parseInt(numOfParticipants),
+				splitType,
+				parseFloat(yourPercentage.replace("%", "")),
+				parseFloat(otherPercentage.replace("%", "")),
+				groupCode,
+				id,
+				user_id,
+			],
+		);
+
+		if (updateResult.rows.length === 0) {
+			return res.status(500).json({
+				error: "Update failed",
+				message:
+					"Something went wrong while updating the group expense. Please try again.",
+			});
+		}
+
+		res.status(200).json({
+			message: "Group expense updated successfully!",
+			groupExpense: updateResult.rows[0],
+		});
+	} catch (err) {
+		console.error("Error updating group expense:", err.message);
+
+		// Handle specific database errors
+		if (err.code === "23505") {
+			return res.status(400).json({
+				error: "Duplicate entry",
+				message:
+					"A group expense with this group code already exists. Please use a different group code.",
+			});
+		}
+
+		if (err.code === "23502") {
+			return res.status(400).json({
+				error: "Invalid data",
+				message:
+					"Some required information is missing. Please fill in all required fields.",
+			});
+		}
+
+		if (err.code === "22P02") {
+			return res.status(400).json({
+				error: "Invalid format",
+				message:
+					"Please check that all numbers and dates are in the correct format.",
+			});
+		}
+
+		res.status(500).json({
+			error: "Update failed",
+			message:
+				"An unexpected error occurred while updating the group expense. Please try again later.",
+		});
+	}
+});
+
+// DELETE /group-expense/:id: Delete an existing group expense
+app.delete("/group-expense/:id", async (req, res) => {
+	const { id } = req.params;
+	const user_id = req.session.user_id;
+
+	if (!user_id) {
+		return res.status(401).json({
+			error: "Authentication required",
+			message: "Please log in to delete group expenses.",
+		});
+	}
+
+	try {
+		// First, check if the group expense exists
+		const existsResult = await pool.query(
+			"SELECT owner, expense_title FROM groupexpense WHERE groupexpense_id = $1",
+			[id],
+		);
+
+		if (existsResult.rows.length === 0) {
+			return res.status(404).json({
+				error: "Group expense not found",
+				message:
+					"The group expense you're trying to delete doesn't exist or may have already been deleted.",
+			});
+		}
+
+		const groupExpense = existsResult.rows[0];
+
+		// Check if the current user is the owner BEFORE proceeding
+		if (groupExpense.owner !== user_id) {
+			return res.status(403).json({
+				error: "Permission denied",
+				message: `You don't have permission to delete "${groupExpense.expense_title}". Only the group owner can delete this expense.`,
+			});
+		}
+
+		// Check if there are any payments associated with this group expense
+		const paymentsResult = await pool.query(
+			"SELECT COUNT(*) as payment_count FROM groupexpense_payments WHERE groupexpense_id = $1",
+			[id],
+		);
+
+		const paymentCount = parseInt(paymentsResult.rows[0].payment_count);
+
+		if (paymentCount > 0) {
+			return res.status(400).json({
+				error: "Cannot delete",
+				message: `This group expense has ${paymentCount} payment(s) associated with it. Group expenses with payments cannot be deleted for record-keeping purposes.`,
+			});
+		}
+
+		// Only delete if the user is the owner (double-check with WHERE clause)
+		const deleteResult = await pool.query(
+			"DELETE FROM groupexpense WHERE groupexpense_id = $1 AND owner = $2 RETURNING expense_title",
+			[id, user_id],
+		);
+
+		// This should never happen given our checks above, but just in case
+		if (deleteResult.rows.length === 0) {
+			return res.status(403).json({
+				error: "Permission denied",
+				message: "You don't have permission to delete this group expense.",
+			});
+		}
+
+		res.status(200).json({
+			message: `Group expense "${deleteResult.rows[0].expense_title}" has been deleted successfully!`,
+		});
+	} catch (err) {
+		console.error("Error deleting group expense:", err.message);
+
+		// Handle foreign key constraint errors
+		if (err.code === "23503") {
+			return res.status(400).json({
+				error: "Cannot delete",
+				message:
+					"This group expense cannot be deleted because it has related records. Please contact support if you need assistance.",
+			});
+		}
+
+		res.status(500).json({
+			error: "Delete failed",
+			message:
+				"An unexpected error occurred while deleting the group expense. Please try again later.",
+		});
+	}
+});
+
+// Handle group expense payment
+app.post("/group-expense/pay", async (req, res) => {
+	const {
+		groupExpenseId,
+		amount,
+		paymentMethod,
+		referenceNotes,
+		expenseTitle,
+	} = req.body;
+	const userId = req.session.user_id;
+
+	if (!userId) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	if (!groupExpenseId || !amount || !paymentMethod) {
+		return res.status(400).json({ error: "Missing required fields" });
+	}
+
+	const client = await pool.connect();
+
+	try {
+		await client.query("BEGIN");
+
+		// 1. Get expense details
+		const expenseQuery = `
+            SELECT expense_title, amount as total_amount, owner
+            FROM groupexpense 
+            WHERE groupexpense_id = $1
+        `;
+		const expenseResult = await client.query(expenseQuery, [groupExpenseId]);
+
+		if (expenseResult.rows.length === 0) {
+			throw new Error("Group expense not found");
+		}
+
+		const expense = expenseResult.rows[0];
+
+		// 2. Insert into transactions table (simplified - only required columns)
+		const transactionQuery = `
+            INSERT INTO transactions (
+                user_id,
+                type,
+                category,
+                amount,
+                description,
+                date
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6
+            ) RETURNING transaction_id
+        `;
+
+		const transactionValues = [
+			userId,
+			"Expense", // Match the type used in your other transactions
+			"Group Expense",
+			amount,
+			`Payment for: ${
+				expenseTitle || expense.expense_title
+			} (via ${paymentMethod})`,
+			new Date().toISOString().split("T")[0], // Format as YYYY-MM-DD
+		];
+
+		const transactionResult = await client.query(
+			transactionQuery,
+			transactionValues,
+		);
+		const transactionId = transactionResult.rows[0].transaction_id;
+
+		// 3. Insert into groupexpense_payments table (simplified)
+		const paymentQuery = `
+            INSERT INTO groupexpense_payments (
+                groupexpense_id,
+                user_id,
+                transaction_id,
+                amount,
+                payment_method,
+                reference_notes,
+                payment_status
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7
+            ) RETURNING id
+        `;
+
+		const paymentValues = [
+			groupExpenseId,
+			userId,
+			transactionId,
+			amount,
+			paymentMethod,
+			referenceNotes || null,
+			"completed",
+		];
+
+		const paymentResult = await client.query(paymentQuery, paymentValues);
+		const paymentId = paymentResult.rows[0].id;
+
+		await client.query("COMMIT");
+
+		res.json({
+			success: true,
+			paymentId: paymentId,
+			transactionId: transactionId,
+			message: "Payment processed successfully",
+		});
+	} catch (error) {
+		await client.query("ROLLBACK");
+		console.error("Payment processing error:", error);
+		res.status(500).json({
+			error: "Payment processing failed",
+			details: error.message,
+		});
+	} finally {
+		client.release();
+	}
+});
+
+// Add this route to get payments for a specific group expense
+app.get("/group-expense/:id/payments", async (req, res) => {
+	const { id } = req.params;
+	const userId = req.session.user_id;
+
+	if (!userId) {
+		return res.status(401).json({ error: "User not authenticated" });
+	}
+
+	try {
+		const query = `
+            SELECT 
+                gep.id as payment_id,
+                gep.amount,
+                gep.payment_method,
+                gep.reference_notes,
+                gep.payment_status,
+                gep.created_at as payment_date,
+                gep.user_id,
+                u.username,
+                u.email
+            FROM groupexpense_payments gep
+            JOIN users u ON gep.user_id = u.user_id
+            WHERE gep.groupexpense_id = $1
+            ORDER BY gep.created_at DESC
+        `;
+
+		const result = await pool.query(query, [id]);
+		res.json(result.rows);
+	} catch (error) {
+		console.error("Error fetching payment history:", error);
+		res.status(500).json({ error: "Failed to fetch payment history" });
 	}
 });
 
